@@ -1,0 +1,47 @@
+@relation Testtest
+
+@attribute '﻿Wk 1' {'Wk 1',' Wk 2'}
+@attribute Product {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T}
+@attribute Sales numeric
+
+@data
+'Wk 1',A,108
+'Wk 1',B,125
+'Wk 1',C,119
+'Wk 1',D,111
+'Wk 1',E,131
+'Wk 1',F,114
+'Wk 1',G,116
+'Wk 1',H,92
+'Wk 1',I,101
+'Wk 1',J,121
+'Wk 1',K,130
+'Wk 1',L,117
+'Wk 1',M,124
+'Wk 1',N,113
+'Wk 1',O,124
+'Wk 1',P,112
+'Wk 1',Q,102
+'Wk 1',R,129
+'Wk 1',S,125
+'Wk 1',T,112
+' Wk 2',A,113
+' Wk 2',B,124
+' Wk 2',C,124
+' Wk 2',D,104
+' Wk 2',E,97
+' Wk 2',F,107
+' Wk 2',G,118
+' Wk 2',H,103
+' Wk 2',I,110
+' Wk 2',J,122
+' Wk 2',K,108
+' Wk 2',L,123
+' Wk 2',M,118
+' Wk 2',N,113
+' Wk 2',O,102
+' Wk 2',P,116
+' Wk 2',Q,116
+' Wk 2',R,120
+' Wk 2',S,118
+' Wk 2',T,93

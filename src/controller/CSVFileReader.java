@@ -22,7 +22,7 @@ public class CSVFileReader {
 	Object[] columnNames;
 	transient CSVReader CSVFileReader;
 	
-	public Instances readCSV(File csvFileName, String arffFileName) throws IOException{
+	public void readCSV(File csvFileName, String arffFileName) throws IOException{
 		
 		File arffFile = new File(arffFileName);
 		
@@ -43,7 +43,7 @@ public class CSVFileReader {
 	//    saver.setDestination(new File(arffFileName));
 	    saver.writeBatch();
 	   	   
-	    return data;
+	  
 		
 	}
 	

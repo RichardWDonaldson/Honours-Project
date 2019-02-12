@@ -17,6 +17,7 @@ import weka.core.Utils;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
+//TODO Try and find a way of removing the database driver warnings, as they have an impact on performance
 
 
 public class MLP {
@@ -24,10 +25,12 @@ public class MLP {
 Instances trainingInstances;
 Instances testInstances;
 	
+	//TODO Check if there are any advanced settings
+//TODO Change settings based on users choice
+
 	
 	
-	
-private void singleBuildExample() throws Exception {
+public void singleBuildExample(File arffFile) throws Exception {
 
 /* if training set is supplied then run this
  * Instances trainingInstances = getInstances("ionosphereTrain.arff");
@@ -35,8 +38,15 @@ private void singleBuildExample() throws Exception {
 		 
 		 	else
 		 	
+		 	
+		 	
+		 	
 		 	run split Training set on File to be able to get both training and testing file
  */
+	
+	splitTrainingSet(arffFile);
+	
+	
 	
 	System.out.println("Training " + trainingInstances.numInstances() + " Test " + testInstances.numInstances() + "\r\n\r\nBuilding Classifier");
 	
@@ -65,17 +75,17 @@ private void singleBuildExample() throws Exception {
 	System.out.println(eval.toSummaryString("\nResults\n======\n", false));
 
 	// if you want the confusion matrix too
-	double[][] cmMatrix = eval.confusionMatrix();
-	
-     
-    for(int row_i=0; row_i<cmMatrix.length; row_i++){
-        for(int col_i=0; col_i<cmMatrix.length; col_i++){
-            System.out.print(cmMatrix[row_i][col_i]);
-            System.out.print("|");
-        }
-        System.out.println();
-        System.out.println();
-    }
+//	double[][] cmMatrix = eval.confusionMatrix();
+//	
+//     
+//    for(int row_i=0; row_i<cmMatrix.length; row_i++){
+//        for(int col_i=0; col_i<cmMatrix.length; col_i++){
+//            System.out.print(cmMatrix[row_i][col_i]);
+//            System.out.print("|");
+//        }
+//        System.out.println();
+//        System.out.println();
+//    }
 	
     
 	
@@ -85,15 +95,15 @@ private void singleBuildExample() throws Exception {
 	
 }
 
-private void splitTrainingSet() throws Exception {
-	/* USE THIS CODE TO LOAD AN ARFF FILE THEN RANDOMLY SPLIT INTO
-	 * TRAIN AND TEST SETS
+private void splitTrainingSet(File arffFile) throws Exception {
+	//USE THIS CODE TO LOAD AN ARFF FILE THEN RANDOMLY SPLIT INTO
+	 // TRAIN AND TEST SETS
 	 
 	// For arff files, you can use this method directly to load data
 	// The method also sets the class attribute as the last attribute 		
 	
 
-	Instances data = getInstances("ionosphere.arff");
+	Instances data = getInstances(arffFile.getName());
 	
 	//randomise the data. 
 	// Set the seed to System.currentTimeMillis(); to give different seeds each time 
@@ -108,11 +118,11 @@ private void splitTrainingSet() throws Exception {
 	int testSize = dataSize - trainingSize;
 
 	//actual split
-	Instances trainingInstances = new Instances(data, 0, trainingSize);
-	Instances testInstances = new Instances(data, trainingSize, testSize);
+	 trainingInstances = new Instances(data, 0, trainingSize);
+	 testInstances = new Instances(data, trainingSize, testSize);
 
 	
-	 END OF RANDOM SPLIT CODE 	*/
+	// END OF RANDOM SPLIT CODE 	*/
 	
 	
 		

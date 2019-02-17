@@ -6,10 +6,14 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -30,18 +34,32 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+import javax.swing.JCheckBox;
 
 public class CSVView {
-
+//TODO Advanced Settings Checkbox Event Listener/handler
 
 	private JFrame frame;
 	private JTable tblOutput;
+	private JTextField txtLearningRate;
+	private JTextField txtMomentum;
+	private JTextField txtIterations;
+	private JTextField txtSeed;
+	private JTextField txtStructure;
+	private JTextField txtValidationThreshold;
+	private JTextField txtValidationSize;
 	
 	Instances instance;
 	
 	File csvFile;
 	File arffFile;
+	
+	int productChoice;
+	
 
+	
 	/**
 	 * Launch the application.
 	 */
@@ -70,19 +88,19 @@ public class CSVView {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 600, 440);
+		frame.setBounds(100, 100, 815, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{510, 0, 0, 0};
+		gridBagLayout.columnWidths = new int[]{215, 0};
 		gridBagLayout.rowHeights = new int[]{335, 0, 0};
-		gridBagLayout.columnWeights = new double[]{1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBorder(new CompoundBorder());
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.insets = new Insets(0, 0, 5, 5);
+		gbc_tabbedPane.insets = new Insets(0, 0, 5, 0);
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 0;
 		gbc_tabbedPane.gridy = 0;
@@ -103,10 +121,10 @@ public class CSVView {
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab("Settings", null, panel_2, null);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.columnWidths = new int[]{162, 0, 423, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
 		JLabel lblNewLabel = new JLabel("Algorithm");
@@ -117,13 +135,13 @@ public class CSVView {
 		gbc_lblNewLabel.gridy = 0;
 		panel_2.add(lblNewLabel, gbc_lblNewLabel);
 		
-		JComboBox comboBox = new JComboBox();
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 1;
-		gbc_comboBox.gridy = 0;
-		panel_2.add(comboBox, gbc_comboBox);
+		JComboBox<?> cbAlgorithm = new JComboBox<Object>();
+		GridBagConstraints gbc_cbAlgorithm = new GridBagConstraints();
+		gbc_cbAlgorithm.insets = new Insets(0, 0, 5, 5);
+		gbc_cbAlgorithm.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cbAlgorithm.gridx = 1;
+		gbc_cbAlgorithm.gridy = 0;
+		panel_2.add(cbAlgorithm, gbc_cbAlgorithm);
 		
 		JLabel lblNewLabel_1 = new JLabel("Product");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
@@ -132,94 +150,245 @@ public class CSVView {
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 1;
 		panel_2.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		JComboBox comboBox_1 = new JComboBox();
-		GridBagConstraints gbc_comboBox_1 = new GridBagConstraints();
-		gbc_comboBox_1.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox_1.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox_1.gridx = 1;
-		gbc_comboBox_1.gridy = 1;
-		panel_2.add(comboBox_1, gbc_comboBox_1);
-		
-		JRadioButton rdbtnTesting = new JRadioButton("Testing");
-		GridBagConstraints gbc_rdbtnTesting = new GridBagConstraints();
-		gbc_rdbtnTesting.insets = new Insets(0, 0, 5, 5);
-		gbc_rdbtnTesting.gridx = 1;
-		gbc_rdbtnTesting.gridy = 3;
-		panel_2.add(rdbtnTesting, gbc_rdbtnTesting);
-		
-	
-		
-		JRadioButton rdbtnTraining = new JRadioButton("Training");
-		GridBagConstraints gbc_rdbtnTraining = new GridBagConstraints();
-		gbc_rdbtnTraining.insets = new Insets(0, 0, 5, 5);
-		gbc_rdbtnTraining.gridx = 1;
-		gbc_rdbtnTraining.gridy = 4;
-		panel_2.add(rdbtnTraining, gbc_rdbtnTraining);
-		
-		JRadioButton rdbtnForecasting = new JRadioButton("Forecasting");
-		GridBagConstraints gbc_rdbtnForecasting = new GridBagConstraints();
-		gbc_rdbtnForecasting.fill = GridBagConstraints.VERTICAL;
-		gbc_rdbtnForecasting.insets = new Insets(0, 0, 5, 5);
-		gbc_rdbtnForecasting.gridx = 1;
-		gbc_rdbtnForecasting.gridy = 5;
-		panel_2.add(rdbtnForecasting, gbc_rdbtnForecasting);
-		
-		ButtonGroup group = new ButtonGroup();
-		
-		group.add(rdbtnForecasting);
-		group.add(rdbtnTraining);
-		group.add(rdbtnTesting);
-		
-		
-		JButton btnAdvancedSettings = new JButton("Advanced Settings");
-		btnAdvancedSettings.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//Open new form for advanced MLP settings
+				
+				JComboBox<Object[]> cbProduct = new JComboBox<Object[]>();
+				GridBagConstraints gbc_cbProduct = new GridBagConstraints();
+				gbc_cbProduct.insets = new Insets(0, 0, 5, 5);
+				gbc_cbProduct.fill = GridBagConstraints.HORIZONTAL;
+				gbc_cbProduct.gridx = 1;
+				gbc_cbProduct.gridy = 1;
+				panel_2.add(cbProduct, gbc_cbProduct);
+				
+				JCheckBox chckbxAdvancedSettings = new JCheckBox("Advanced Settings");
+				GridBagConstraints gbc_chckbxAdvancedSettings = new GridBagConstraints();
+				gbc_chckbxAdvancedSettings.insets = new Insets(0, 0, 5, 5);
+				gbc_chckbxAdvancedSettings.gridx = 0;
+				gbc_chckbxAdvancedSettings.gridy = 3;
+				panel_2.add(chckbxAdvancedSettings, gbc_chckbxAdvancedSettings);
 				
 				
-			}
-		});
-		GridBagConstraints gbc_btnAdvancedSettings = new GridBagConstraints();
-		gbc_btnAdvancedSettings.insets = new Insets(0, 0, 5, 5);
-		gbc_btnAdvancedSettings.anchor = GridBagConstraints.ABOVE_BASELINE;
-		gbc_btnAdvancedSettings.gridx = 1;
-		gbc_btnAdvancedSettings.gridy = 7;
-		panel_2.add(btnAdvancedSettings, gbc_btnAdvancedSettings);
-		
-		
-		
-		JButton btnRun = new JButton("Run");
-		btnRun.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			//TODO Add advanced Settings check
-				if(arffFile == null) {
-					
-					JOptionPane.showMessageDialog(frame, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
-					
-				} else {
-					
-					MLP mlp = new MLP();
-					
-					try {
-						mlp.singleBuildExample(arffFile);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						JOptionPane.showMessageDialog(frame, "MLP Stack Trace", "Error", JOptionPane.ERROR_MESSAGE);
+				
+				
+				
+				
+				
+				JPanel panel_1 = new JPanel();
+				panel_1.setBorder(new TitledBorder(null, "Advanced Settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+				GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+				gbc_panel_1.fill = GridBagConstraints.BOTH;
+				gbc_panel_1.gridwidth = 3;
+				gbc_panel_1.insets = new Insets(0, 0, 5, 0);
+				gbc_panel_1.gridx = 0;
+				gbc_panel_1.gridy = 4;
+				panel_2.add(panel_1, gbc_panel_1);
+				GridBagLayout gbl_panel_1 = new GridBagLayout();
+				gbl_panel_1.columnWidths = new int[]{0, 0, 0, 390, 0};
+				gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+				gbl_panel_1.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+				gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+				panel_1.setLayout(gbl_panel_1);
+				
+				
+				
+				JLabel lblNewLabel_2 = new JLabel("Learning Rate");
+				GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+				gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_2.gridx = 0;
+				gbc_lblNewLabel_2.gridy = 1;
+				panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+				
+				txtLearningRate = new JTextField();
+				txtLearningRate.setEnabled(false);
+				GridBagConstraints gbc_txtLearningRate = new GridBagConstraints();
+				gbc_txtLearningRate.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtLearningRate.insets = new Insets(0, 0, 5, 5);
+				gbc_txtLearningRate.gridx = 1;
+				gbc_txtLearningRate.gridy = 1;
+				panel_1.add(txtLearningRate, gbc_txtLearningRate);
+				txtLearningRate.setColumns(10);
+				
+				JLabel lblNewLabel_5 = new JLabel("Seed");
+				GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+				gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_5.gridx = 2;
+				gbc_lblNewLabel_5.gridy = 1;
+				panel_1.add(lblNewLabel_5, gbc_lblNewLabel_5);
+				
+				txtSeed = new JTextField();
+				txtSeed.setEnabled(false);
+				GridBagConstraints gbc_txtSeed = new GridBagConstraints();
+				gbc_txtSeed.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtSeed.insets = new Insets(0, 0, 5, 0);
+				gbc_txtSeed.gridx = 3;
+				gbc_txtSeed.gridy = 1;
+				panel_1.add(txtSeed, gbc_txtSeed);
+				txtSeed.setColumns(10);
+				
+				JLabel lblNewLabel_3 = new JLabel("Momentum");
+				GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+				gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_3.gridx = 0;
+				gbc_lblNewLabel_3.gridy = 2;
+				panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
+				
+				txtMomentum = new JTextField();
+				txtMomentum.setEnabled(false);
+				GridBagConstraints gbc_txtMomentum = new GridBagConstraints();
+				gbc_txtMomentum.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtMomentum.insets = new Insets(0, 0, 5, 5);
+				gbc_txtMomentum.gridx = 1;
+				gbc_txtMomentum.gridy = 2;
+				panel_1.add(txtMomentum, gbc_txtMomentum);
+				txtMomentum.setColumns(10);
+				
+				JLabel lblNewLabel_6 = new JLabel("Structure");
+				GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+				gbc_lblNewLabel_6.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_6.gridx = 2;
+				gbc_lblNewLabel_6.gridy = 2;
+				panel_1.add(lblNewLabel_6, gbc_lblNewLabel_6);
+				
+				txtStructure = new JTextField();
+				txtStructure.setEnabled(false);
+				GridBagConstraints gbc_txtStructure = new GridBagConstraints();
+				gbc_txtStructure.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtStructure.insets = new Insets(0, 0, 5, 0);
+				gbc_txtStructure.gridx = 3;
+				gbc_txtStructure.gridy = 2;
+				panel_1.add(txtStructure, gbc_txtStructure);
+				txtStructure.setColumns(10);
+				
+				JLabel lblNewLabel_4 = new JLabel("Iterations");
+				GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
+				gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_4.gridx = 0;
+				gbc_lblNewLabel_4.gridy = 3;
+				panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
+				
+				txtIterations = new JTextField();
+				txtIterations.setEnabled(false);
+				GridBagConstraints gbc_txtIterations = new GridBagConstraints();
+				gbc_txtIterations.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtIterations.insets = new Insets(0, 0, 5, 5);
+				gbc_txtIterations.gridx = 1;
+				gbc_txtIterations.gridy = 3;
+				panel_1.add(txtIterations, gbc_txtIterations);
+				txtIterations.setColumns(10);
+				
+				JLabel lblNewLabel_7 = new JLabel("Validation Size");
+				GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
+				gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_7.gridx = 2;
+				gbc_lblNewLabel_7.gridy = 3;
+				panel_1.add(lblNewLabel_7, gbc_lblNewLabel_7);
+				
+				txtValidationSize = new JTextField();
+				txtValidationSize.setEnabled(false);
+				GridBagConstraints gbc_txtValidationSize = new GridBagConstraints();
+				gbc_txtValidationSize.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtValidationSize.insets = new Insets(0, 0, 5, 0);
+				gbc_txtValidationSize.gridx = 3;
+				gbc_txtValidationSize.gridy = 3;
+				panel_1.add(txtValidationSize, gbc_txtValidationSize);
+				txtValidationSize.setColumns(10);
+				
+				JLabel lblNewLabel_8 = new JLabel("Validation Threshold");
+				GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+				gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
+				gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
+				gbc_lblNewLabel_8.gridx = 2;
+				gbc_lblNewLabel_8.gridy = 4;
+				panel_1.add(lblNewLabel_8, gbc_lblNewLabel_8);
+				
+				txtValidationThreshold = new JTextField();
+				txtValidationThreshold.setEnabled(false);
+				GridBagConstraints gbc_txtValidationThreshold = new GridBagConstraints();
+				gbc_txtValidationThreshold.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtValidationThreshold.gridx = 3;
+				gbc_txtValidationThreshold.gridy = 4;
+				panel_1.add(txtValidationThreshold, gbc_txtValidationThreshold);
+				txtValidationThreshold.setColumns(10);
+				
+				chckbxAdvancedSettings.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent e) {
+						if(e.getStateChange() == ItemEvent.SELECTED) {
+						//	panel_1.setVisible(true);
+							//TODO optimize code
+							txtIterations.setEditable(true);
+							txtLearningRate.setEditable(true);
+							txtMomentum.setEditable(true);
+							txtSeed.setEditable(true);
+							txtStructure.setEditable(true);
+							txtValidationThreshold.setEditable(true);
+							txtValidationSize.setEditable(true);
+							
+						} else {
+							txtIterations.setEditable(false);
+							txtLearningRate.setEditable(false);
+							txtMomentum.setEditable(false);
+							txtSeed.setEditable(false);
+							txtStructure.setEditable(false);
+							txtValidationThreshold.setEditable(false);
+							txtValidationSize.setEditable(false);
+							
+						}
+					}
+				});
+				
+				
+				
+				JButton btnRun = new JButton("Run");
+				btnRun.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+					//TODO Add advanced Settings check
+						if(arffFile == null) {
+							
+							JOptionPane.showMessageDialog(frame, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
+							
+						} else {
+							//TODO Add advanced settings in
+							MLP mlp = new MLP();
+							
+							try {
+								
+						productChoice = cbProduct.getSelectedIndex();
+						System.out.println("Chosen Product " + productChoice);
+						if(productChoice == 0) {
+							//Error - No product selected
+						} else {
+							
 						
-					} 
-					
-				}
+							
+							
+							
+							
+							mlp.singleBuildExample(arffFile, productChoice);
+						}
+					//	mlp.setClassIndex(productChoice);
+						
 
-			}
-		});
-		GridBagConstraints gbc_btnRun = new GridBagConstraints();
-		gbc_btnRun.insets = new Insets(0, 0, 0, 5);
-		gbc_btnRun.anchor = GridBagConstraints.SOUTH;
-		gbc_btnRun.gridx = 1;
-		gbc_btnRun.gridy = 10;
-		panel_2.add(btnRun, gbc_btnRun);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								JOptionPane.showMessageDialog(frame, "MLP Stack Trace", "Error", JOptionPane.ERROR_MESSAGE);
+								
+							} 
+							
+						}
+
+					}
+				});
+				GridBagConstraints gbc_btnRun = new GridBagConstraints();
+				gbc_btnRun.anchor = GridBagConstraints.SOUTH;
+				gbc_btnRun.gridx = 2;
+				gbc_btnRun.gridy = 5;
+				panel_2.add(btnRun, gbc_btnRun);
 		
 		JButton btnLoadCSV = new JButton("Load File");
 		btnLoadCSV.addActionListener(new ActionListener() {
@@ -246,11 +415,16 @@ public class CSVView {
 							csvReader.readCSV(csvFile, "placeholder.arff");
 						
 							arffFile = new File("placeholder.arff");	
-							
-								DefaultTableModel model = csvReader.getTableModel(csvFile);	
+							//TODO Look at fixing type safety
+								DefaultTableModel model = csvReader.getTableModel(csvFile);
+								Object[] productsList = (String[]) csvReader.getColumnNames();
+								DefaultComboBoxModel cbModel = new DefaultComboBoxModel(productsList);
+								cbModel.addElement("All");
+								
+								
 								
 								tblOutput.setModel(model);
-								
+								cbProduct.setModel(cbModel);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -266,11 +440,18 @@ public class CSVView {
 			}
 		});
 		GridBagConstraints gbc_btnLoadCSV = new GridBagConstraints();
-		gbc_btnLoadCSV.insets = new Insets(0, 0, 0, 5);
 		gbc_btnLoadCSV.gridx = 0;
 		gbc_btnLoadCSV.gridy = 1;
 		frame.getContentPane().add(btnLoadCSV, gbc_btnLoadCSV);
 	}
 
+	public void populateElements() {
+		
+		
+		
+	}
+	
+	
+	
 
 }

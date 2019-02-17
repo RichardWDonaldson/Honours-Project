@@ -105,6 +105,16 @@ public DefaultTableModel getTableModel(File file) {
 		
 		
 	}
+
+	public Object[] getColumnNames() {
+		return columnNames;
+	}
+
+	public void setColumnNames(Object[] columnNames) {
+		this.columnNames = columnNames;
+	}
+	
+
 	
 
 	

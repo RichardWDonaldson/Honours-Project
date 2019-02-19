@@ -28,7 +28,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import controller.CSVFileReader;
+import controller.Forecaster;
 import controller.MLP;
+import model.AdvancedSettings;
 import weka.core.Instances;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
@@ -40,12 +42,13 @@ import javax.swing.JCheckBox;
 
 public class CSVView {
 //TODO Advanced Settings Checkbox Event Listener/handler
-
+//TODO Validate all input
+	
 	private JFrame frame;
 	private JTable tblOutput;
 	private JTextField txtLearningRate;
 	private JTextField txtMomentum;
-	private JTextField txtIterations;
+	private JTextField txtTrainingIterations;
 	private JTextField txtSeed;
 	private JTextField txtStructure;
 	private JTextField txtValidationThreshold;
@@ -57,7 +60,8 @@ public class CSVView {
 	File arffFile;
 	
 	int productChoice;
-	
+	Object[] productsList;
+	private JTextField txtIterations;
 
 	
 	/**
@@ -123,7 +127,7 @@ public class CSVView {
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
 		gbl_panel_2.columnWidths = new int[]{162, 0, 423, 0};
 		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
@@ -159,7 +163,25 @@ public class CSVView {
 				gbc_cbProduct.gridy = 1;
 				panel_2.add(cbProduct, gbc_cbProduct);
 				
+				JLabel lblNewLabel_9 = new JLabel("Iterations");
+				GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+				gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_9.anchor = GridBagConstraints.NORTHEAST;
+				gbc_lblNewLabel_9.gridx = 0;
+				gbc_lblNewLabel_9.gridy = 2;
+				panel_2.add(lblNewLabel_9, gbc_lblNewLabel_9);
+				
+				txtIterations = new JTextField();
+				GridBagConstraints gbc_txtIterations = new GridBagConstraints();
+				gbc_txtIterations.insets = new Insets(0, 0, 5, 5);
+				gbc_txtIterations.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtIterations.gridx = 1;
+				gbc_txtIterations.gridy = 2;
+				panel_2.add(txtIterations, gbc_txtIterations);
+				txtIterations.setColumns(10);
+				
 				JCheckBox chckbxAdvancedSettings = new JCheckBox("Advanced Settings");
+				chckbxAdvancedSettings.setSelected(true);
 				GridBagConstraints gbc_chckbxAdvancedSettings = new GridBagConstraints();
 				gbc_chckbxAdvancedSettings.insets = new Insets(0, 0, 5, 5);
 				gbc_chckbxAdvancedSettings.gridx = 0;
@@ -199,7 +221,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
 				
 				txtLearningRate = new JTextField();
-				txtLearningRate.setEnabled(false);
 				GridBagConstraints gbc_txtLearningRate = new GridBagConstraints();
 				gbc_txtLearningRate.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtLearningRate.insets = new Insets(0, 0, 5, 5);
@@ -217,7 +238,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_5, gbc_lblNewLabel_5);
 				
 				txtSeed = new JTextField();
-				txtSeed.setEnabled(false);
 				GridBagConstraints gbc_txtSeed = new GridBagConstraints();
 				gbc_txtSeed.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtSeed.insets = new Insets(0, 0, 5, 0);
@@ -235,7 +255,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 				
 				txtMomentum = new JTextField();
-				txtMomentum.setEnabled(false);
 				GridBagConstraints gbc_txtMomentum = new GridBagConstraints();
 				gbc_txtMomentum.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtMomentum.insets = new Insets(0, 0, 5, 5);
@@ -253,7 +272,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_6, gbc_lblNewLabel_6);
 				
 				txtStructure = new JTextField();
-				txtStructure.setEnabled(false);
 				GridBagConstraints gbc_txtStructure = new GridBagConstraints();
 				gbc_txtStructure.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtStructure.insets = new Insets(0, 0, 5, 0);
@@ -262,7 +280,7 @@ public class CSVView {
 				panel_1.add(txtStructure, gbc_txtStructure);
 				txtStructure.setColumns(10);
 				
-				JLabel lblNewLabel_4 = new JLabel("Iterations");
+				JLabel lblNewLabel_4 = new JLabel("Training Iterations");
 				GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
 				gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 				gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
@@ -270,15 +288,14 @@ public class CSVView {
 				gbc_lblNewLabel_4.gridy = 3;
 				panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
 				
-				txtIterations = new JTextField();
-				txtIterations.setEnabled(false);
-				GridBagConstraints gbc_txtIterations = new GridBagConstraints();
-				gbc_txtIterations.fill = GridBagConstraints.HORIZONTAL;
-				gbc_txtIterations.insets = new Insets(0, 0, 5, 5);
-				gbc_txtIterations.gridx = 1;
-				gbc_txtIterations.gridy = 3;
-				panel_1.add(txtIterations, gbc_txtIterations);
-				txtIterations.setColumns(10);
+				txtTrainingIterations = new JTextField();
+				GridBagConstraints gbc_txtTrainingIterations = new GridBagConstraints();
+				gbc_txtTrainingIterations.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtTrainingIterations.insets = new Insets(0, 0, 5, 5);
+				gbc_txtTrainingIterations.gridx = 1;
+				gbc_txtTrainingIterations.gridy = 3;
+				panel_1.add(txtTrainingIterations, gbc_txtTrainingIterations);
+				txtTrainingIterations.setColumns(10);
 				
 				JLabel lblNewLabel_7 = new JLabel("Validation Size");
 				GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
@@ -289,7 +306,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_7, gbc_lblNewLabel_7);
 				
 				txtValidationSize = new JTextField();
-				txtValidationSize.setEnabled(false);
 				GridBagConstraints gbc_txtValidationSize = new GridBagConstraints();
 				gbc_txtValidationSize.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtValidationSize.insets = new Insets(0, 0, 5, 0);
@@ -307,7 +323,6 @@ public class CSVView {
 				panel_1.add(lblNewLabel_8, gbc_lblNewLabel_8);
 				
 				txtValidationThreshold = new JTextField();
-				txtValidationThreshold.setEnabled(false);
 				GridBagConstraints gbc_txtValidationThreshold = new GridBagConstraints();
 				gbc_txtValidationThreshold.fill = GridBagConstraints.HORIZONTAL;
 				gbc_txtValidationThreshold.gridx = 3;
@@ -320,7 +335,7 @@ public class CSVView {
 						if(e.getStateChange() == ItemEvent.SELECTED) {
 						//	panel_1.setVisible(true);
 							//TODO optimize code
-							txtIterations.setEditable(true);
+							txtTrainingIterations.setEditable(true);
 							txtLearningRate.setEditable(true);
 							txtMomentum.setEditable(true);
 							txtSeed.setEditable(true);
@@ -329,7 +344,7 @@ public class CSVView {
 							txtValidationSize.setEditable(true);
 							
 						} else {
-							txtIterations.setEditable(false);
+							txtTrainingIterations.setEditable(false);
 							txtLearningRate.setEditable(false);
 							txtMomentum.setEditable(false);
 							txtSeed.setEditable(false);
@@ -347,6 +362,10 @@ public class CSVView {
 				btnRun.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 					//TODO Add advanced Settings check
+						int iterations;
+						String productName;
+						
+						
 						if(arffFile == null) {
 							
 							JOptionPane.showMessageDialog(frame, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
@@ -354,23 +373,42 @@ public class CSVView {
 						} else {
 							//TODO Add advanced settings in
 							MLP mlp = new MLP();
+							Forecaster forecast = new Forecaster();
+							
 							
 							try {
 								
 						productChoice = cbProduct.getSelectedIndex();
-						System.out.println("Chosen Product " + productChoice);
+						productName = (String) productsList[productChoice];
+						
+						
+						if(txtIterations.getText().isEmpty()) {
+						 iterations = 1;
+						} else {
+							 iterations = Integer.parseInt(txtIterations.getText());
+						}
+
+					//	System.out.println("Chosen Product " + productChoice);
 						if(productChoice == 0) {
 							//Error - No product selected
+							
 						} else {
 							
-						
+				
+							
+							mlp.simpleBuild(arffFile, productChoice, iterations);
+							
+				//			weka.core.SerializationHelper.write("mlp.model", mlp);
+							
+							//Loading the model Classifier cls = (Classifier) weka.core.SerializationHelper.read("/some/where/j48.model"); 
+							
+							
+						//	forecast.getForecast(arffFile, productName, productChoice);
 							
 							
 							
-							
-							mlp.singleBuildExample(arffFile, productChoice);
 						}
-					//	mlp.setClassIndex(productChoice);
+					
 						
 
 							} catch (Exception e) {
@@ -397,6 +435,7 @@ public class CSVView {
 				final JFileChooser fc = new JFileChooser();
 				
 				int returnVal = fc.showOpenDialog(frame);
+			
 				
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
 					csvFile = fc.getSelectedFile();
@@ -417,9 +456,9 @@ public class CSVView {
 							arffFile = new File("placeholder.arff");	
 							//TODO Look at fixing type safety
 								DefaultTableModel model = csvReader.getTableModel(csvFile);
-								Object[] productsList = (String[]) csvReader.getColumnNames();
+								productsList = (String[]) csvReader.getColumnNames();
 								DefaultComboBoxModel cbModel = new DefaultComboBoxModel(productsList);
-								cbModel.addElement("All");
+								
 								
 								
 								
@@ -445,13 +484,8 @@ public class CSVView {
 		frame.getContentPane().add(btnLoadCSV, gbc_btnLoadCSV);
 	}
 
-	public void populateElements() {
-		
-		
-		
-	}
+
 	
-	
-	
+
 
 }

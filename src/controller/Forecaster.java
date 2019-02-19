@@ -8,34 +8,27 @@ import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.timeseries.WekaForecaster;
 
 public class Forecaster {
-	
-	
+		
 public void getForecast(File arffFile, String fieldsToForecast, int classIndex) {
 	
-
-
-
-
 	
 try {
-	//TODO instance is null
+	
 	Instances instance = MLP.getInstances(arffFile.getName(), classIndex);	
 	
 	
 	WekaForecaster forecaster = new WekaForecaster();	
-	
-	
-	
+		
 	forecaster.setFieldsToForecast(fieldsToForecast);
 	
 	forecaster.setBaseForecaster(new MultilayerPerceptron());
 	
-	forecaster.getTSLagMaker().setTimeStampField("Date");
-	forecaster.getTSLagMaker().setMinLag(1);
-	forecaster.getTSLagMaker().setMaxLag(52);
+	//forecaster.getTSLagMaker().setTimeStampField("Date");
+	//forecaster.getTSLagMaker().setMinLag(1);
+	//forecaster.getTSLagMaker().setMaxLag(52);
 	
 	
-	forecaster.getTSLagMaker().setAddDayOfWeek(true);
+	//forecaster.getTSLagMaker().setAddDayOfWeek(true);
 	
 	
 	forecaster.buildForecaster(instance, System.out);
@@ -47,19 +40,15 @@ try {
 	for(int i = 0; i < 12; i++) {
 		List<NumericPrediction> predsAtStep = forecast.get(i);
 		
-		for(int j = 0; j < 2; j++) {
-			NumericPrediction predForTarget = predsAtStep.get(j);
+		
+			NumericPrediction predForTarget = predsAtStep.get(0);
 			
 			System.out.print("" + predForTarget.predicted() + " ");
-		}
+		
 		
 		System.out.println();
 	}
-	
-	
-	
-	
-	
+
 	
 } catch (Exception e) {
 	// TODO Auto-generated catch block

@@ -2,6 +2,10 @@ package model;
 
 public class Result {
 	
+	
+	
+	
+	
 double correlationCoefficient;
 double meanAbsoluteError;
 double rootMeanSquredError;
@@ -62,9 +66,20 @@ public String toString() {
 	
 
 //TODO Fix toString so it outputs in the format I want	
-	return "Result [correlationCoefficient=" + correlationCoefficient + ", meanAbsoluteError=" + meanAbsoluteError
-			+ ", rootMeanSquredError=" + rootMeanSquredError + ", relativeAbsoluteError=" + relativeAbsoluteError
-			+ ", rootRelativeSquredError=" + rootRelativeSquredError + ", instances=" + instances + "]";
+	//TODO output appropriate d.p.
+	return "CorrelationCoefficient=\t\t" 
+		+ correlationCoefficient 
+		+ ", \nmeanAbsoluteError=\t\t" 
+		+ meanAbsoluteError
+		+ ", \nrootMeanSquredError=\t\t" 
+		+ rootMeanSquredError 
+		+ ", \nrelativeAbsoluteError=\t\t" 
+			+ relativeAbsoluteError
+			+ ", \nrootRelativeSquredError=\t\t" 
+			+ rootRelativeSquredError 
+			+ ", \ninstances=\t\t" 
+			+ instances; 
+			
 
 	}
 

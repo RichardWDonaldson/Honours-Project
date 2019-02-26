@@ -19,7 +19,7 @@ import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
 
-//FIXME Check if there are any advanced settings
+
 //TODO Add model saving https://stackoverflow.com/questions/33556543/how-to-save-model-and-apply-it-on-a-test-dataset-on-java 
 //TODO change console output to JTextArea https://stackoverflow.com/questions/4443878/redirecting-system-out-to-jtextpane 
 public class MLP {
@@ -28,43 +28,37 @@ public class MLP {
 	Instances testInstances;
 
 	Model model = new Model();
-	
+
 	public void simpleBuild(File arffFile, int classIndex, int iterations) throws Exception {
 
-		
-		
-		
-		
-
-		
 
 		for(int i = 1; i <= iterations; i++) {
-			
+
 			System.out.println("Iteration: " + i);
-			
-			
+
+
 			splitTrainingSet(arffFile, classIndex);
 
 			System.out.println("Training " + trainingInstances.numInstances() + " Test " + testInstances.numInstances()
-					+ "\r\n\r\nBuilding Classifier");
+			+ "\r\n\r\nBuilding Classifier");
 
-			
+
 			// build classifier on training data
 			Classifier classifier = new MultilayerPerceptron();
-			
+
 			classifier.buildClassifier(trainingInstances);
-			
-			
+
+
 			model.saveEvaluation(testInstances, classifier);
-			
+
 		}
 
 		model.outputResults();
-		
-	}
 
-	public void advancedBuild(int iterations, int learningRate, int momentum, int seed, String structure,
-			int validationThreshold, int validationSize, File arffFile, int classIndex) {
+	}
+	//iterations, learningRate, momentum, seed, structure, validationThreshold, validationSize, file, classIndex
+	public void advancedBuild(double trainingIterations, double learningRate, double momentum, double seed, String structure,
+			double validationThreshold, double validationSize, File arffFile, int classIndex, int iterations) {
 		// -L learning rate
 		// -M momentum
 		// -N training iterations
@@ -76,24 +70,64 @@ public class MLP {
 		// set error can get worse before training is terminated.)
 
 		try {
-			splitTrainingSet(arffFile, classIndex);
+			//TODO Optimise this
 
-			System.out.println("Training " + trainingInstances.numInstances() + " Test " + testInstances.numInstances()
-					+ "\r\n\r\nBuilding Classifier");
+			int tempIterations = (int) trainingIterations;
+			int tempSeeds = (int) seed;
+			int validationSizeToInt = (int) validationSize;
+			int validationThresholdToInt = (int) validationThreshold;
 
-			Classifier classifier = new MultilayerPerceptron();
+			String tempLearningRate = "-L " + Double.toString(learningRate);
+			String tempMomentum = "-M " + Double.toString(momentum);
+			String tempTrainingIterations = "-N " + Integer.toString(tempIterations);
+			String tempSeed = "-S " + Integer.toString(tempSeeds);
+			String tempStructure = "-H " + structure;
+			String tempValidationSize = "-V " + Integer.toString(validationSizeToInt);
+			String tempValidationThreshold = "-E " + Integer.toString(validationThresholdToInt);
+			String tempSettings = tempLearningRate
+					+ " " 
+					+ tempMomentum
+					+ " "
+					+ tempTrainingIterations
+					+ " "
+					+ tempSeed
+					+ " "
+					+ tempStructure
+					+ " "
+					+ tempValidationSize
+					+ " "
+					+ tempValidationThreshold;
 
-			((MultilayerPerceptron) classifier)
-					.setOptions(Utils.splitOptions("-L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H 4,3"));
 
-			classifier.buildClassifier(trainingInstances);
 
-			// evaluate on test data
-			System.out.println("Evaluating Model on Test Set");
-			Evaluation eval = new Evaluation(testInstances);
+			for(int i = 1; i <= iterations; i++ ) {
+				System.out.println("Iteration: " + i);
+				splitTrainingSet(arffFile, classIndex);
 
-			eval.evaluateModel(classifier, testInstances);
-			System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+				System.out.println("Training " + trainingInstances.numInstances() + " Test " + testInstances.numInstances()
+				+ "\r\n\r\nBuilding Classifier");
+
+				Classifier classifier = new MultilayerPerceptron();
+
+				//	((MultilayerPerceptron) classifier).setOptions(Utils.splitOptions("-L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H 4,3"));
+
+				System.out.println(tempSettings);
+				((MultilayerPerceptron) classifier).setOptions(Utils.splitOptions(tempSettings));
+
+				((MultilayerPerceptron) classifier).setNumDecimalPlaces(2);
+				classifier.buildClassifier(trainingInstances);
+
+				// evaluate on test data
+				System.out.println("Evaluating Model on Test Set");
+				Evaluation eval = new Evaluation(testInstances);
+
+				eval.evaluateModel(classifier, testInstances);
+				System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+
+				model.saveEvaluation(testInstances, classifier);
+
+			}
+			model.outputResults();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -101,7 +135,7 @@ public class MLP {
 		}
 
 	}
-
+	//Move this to a shared controller
 	private void splitTrainingSet(File arffFile, int classIndex) throws Exception {
 
 		Instances data = getInstances(arffFile.getName(), classIndex);
@@ -141,22 +175,22 @@ public class MLP {
 		return data;
 	}
 
-	
+
 	// TODO Fix this if you want to display a confusion matrix, null pointer
 	// exception
 	// if you want the confusion matrix too
-//double[][] cmMatrix = eval.confusionMatrix();
-//
-// 
-//for(int row_i=0; row_i<cmMatrix.length; row_i++){
-//    for(int col_i=0; col_i<cmMatrix.length; col_i++){
-//        System.out.print(cmMatrix[row_i][col_i]);
-//        System.out.print("|");
-//    }
-//    System.out.println();
-//    System.out.println();
-//}
-	
-	
-	
+	//double[][] cmMatrix = eval.confusionMatrix();
+	//
+	// 
+	//for(int row_i=0; row_i<cmMatrix.length; row_i++){
+	//    for(int col_i=0; col_i<cmMatrix.length; col_i++){
+	//        System.out.print(cmMatrix[row_i][col_i]);
+	//        System.out.print("|");
+	//    }
+	//    System.out.println();
+	//    System.out.println();
+	//}
+
+
+
 }

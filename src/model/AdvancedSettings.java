@@ -5,16 +5,14 @@ import java.io.File;
 public class AdvancedSettings {
 	
 	String structure;
-	int iterations;
-	int learningRate;
-	int momentum;
-	int seed;
-	int validationThreshold;
-	int validationSize;
-	
-	
-	public AdvancedSettings(String structure, int iterations, int learningRate, int momentum, int seed,
-			int validationThreshold, int validationSize) {
+	double iterations;
+	double learningRate;
+	double momentum;
+	double seed;
+	double validationThreshold;
+	double validationSize;
+	public AdvancedSettings(String structure, double iterations, double learningRate, double momentum, double seed,
+			double validationThreshold, double validationSize) {
 		super();
 		this.structure = structure;
 		this.iterations = iterations;
@@ -24,78 +22,48 @@ public class AdvancedSettings {
 		this.validationThreshold = validationThreshold;
 		this.validationSize = validationSize;
 	}
-
-
 	public String getStructure() {
 		return structure;
 	}
-
-
 	public void setStructure(String structure) {
 		this.structure = structure;
 	}
-
-
-	public int getIterations() {
+	public double getIterations() {
 		return iterations;
 	}
-
-
-	public void setIterations(int iterations) {
+	public void setIterations(double iterations) {
 		this.iterations = iterations;
 	}
-
-
-	public int getLearningRate() {
+	public double getLearningRate() {
 		return learningRate;
 	}
-
-
-	public void setLearningRate(int learningRate) {
+	public void setLearningRate(double learningRate) {
 		this.learningRate = learningRate;
 	}
-
-
-	public int getMomentum() {
+	public double getMomentum() {
 		return momentum;
 	}
-
-
-	public void setMomentum(int momentum) {
+	public void setMomentum(double momentum) {
 		this.momentum = momentum;
 	}
-
-
-	public int getSeed() {
+	public double getSeed() {
 		return seed;
 	}
-
-
-	public void setSeed(int seed) {
+	public void setSeed(double seed) {
 		this.seed = seed;
 	}
-
-
-	public int getValidationThreshold() {
+	public double getValidationThreshold() {
 		return validationThreshold;
 	}
-
-
-	public void setValidationThreshold(int validationThreshold) {
+	public void setValidationThreshold(double validationThreshold) {
 		this.validationThreshold = validationThreshold;
 	}
-
-
-	public int getValidationSize() {
+	public double getValidationSize() {
 		return validationSize;
 	}
-
-
-	public void setValidationSize(int validationSize) {
+	public void setValidationSize(double validationSize) {
 		this.validationSize = validationSize;
 	}
-
-
 	@Override
 	public String toString() {
 		return "AdvancedSettings [structure=" + structure + ", iterations=" + iterations + ", learningRate="
@@ -103,6 +71,9 @@ public class AdvancedSettings {
 				+ validationThreshold + ", validationSize=" + validationSize + "]";
 	}
 	
+	
+	
+
 	
 	
 	

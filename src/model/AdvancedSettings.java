@@ -11,6 +11,8 @@ public class AdvancedSettings {
 	double seed;
 	double validationThreshold;
 	double validationSize;
+	
+	
 	public AdvancedSettings(String structure, double iterations, double learningRate, double momentum, double seed,
 			double validationThreshold, double validationSize) {
 		super();

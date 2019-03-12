@@ -17,11 +17,10 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
+//THIS CODE IS REDUNDANT NOW, DELETE BEFORE SUBMISSION
 
 
 
-//TODO Add model saving https://stackoverflow.com/questions/33556543/how-to-save-model-and-apply-it-on-a-test-dataset-on-java 
-//TODO change console output to JTextArea https://stackoverflow.com/questions/4443878/redirecting-system-out-to-jtextpane 
 public class MLP {
 
 	Instances trainingInstances;
@@ -49,11 +48,11 @@ public class MLP {
 			classifier.buildClassifier(trainingInstances);
 
 
-			model.saveEvaluation(testInstances, classifier);
+		//	model.saveEvaluation(testInstances, classifier);
 
 		}
 
-		model.outputResults();
+	//	model.outputResults();
 
 	}
 	//iterations, learningRate, momentum, seed, structure, validationThreshold, validationSize, file, classIndex
@@ -70,7 +69,7 @@ public class MLP {
 		// set error can get worse before training is terminated.)
 
 		try {
-			//TODO Optimise this
+
 
 			int tempIterations = (int) trainingIterations;
 			int tempSeeds = (int) seed;
@@ -116,7 +115,10 @@ public class MLP {
 
 				((MultilayerPerceptron) classifier).setNumDecimalPlaces(2);
 				classifier.buildClassifier(trainingInstances);
-
+				
+				
+				
+				
 				// evaluate on test data
 				System.out.println("Evaluating Model on Test Set");
 				Evaluation eval = new Evaluation(testInstances);
@@ -124,13 +126,13 @@ public class MLP {
 				eval.evaluateModel(classifier, testInstances);
 				System.out.println(eval.toSummaryString("\nResults\n======\n", false));
 
-				model.saveEvaluation(testInstances, classifier);
+//				model.saveEvaluation(testInstances, classifier);
 
 			}
-			model.outputResults();
+	//		model.outputResults();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		}
 
@@ -146,11 +148,11 @@ public class MLP {
 		Random rand = new Random(seed);
 		data.randomize(rand);
 
-		double trainingSetRatio = 0.66;
+		double trainingSetRatio = 0.661;
 		int dataSize = data.numInstances();
 		int trainingSize = (int) Math.ceil(dataSize * trainingSetRatio);
 		int testSize = dataSize - trainingSize;
-
+		
 		// actual split
 		trainingInstances = new Instances(data, 0, trainingSize);
 		testInstances = new Instances(data, trainingSize, testSize);
@@ -176,7 +178,7 @@ public class MLP {
 	}
 
 
-	// TODO Fix this if you want to display a confusion matrix, null pointer
+	
 	// exception
 	// if you want the confusion matrix too
 	//double[][] cmMatrix = eval.confusionMatrix();

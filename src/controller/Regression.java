@@ -12,8 +12,14 @@ import model.Model;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Instances;
+import weka.core.SelectedTag;
+import weka.core.Utils;
 
 public class Regression {
+	
+	
+	
+	
 
 	Instances trainingInstances;
 	Instances testInstances;
@@ -40,30 +46,59 @@ public class Regression {
 
 				classifier.buildClassifier(trainingInstances);
 
-				model.saveEvaluation(testInstances, classifier);
+				
+			
+				model.saveEvaluation(testInstances, classifier, null);
 
 			}
 
-			model.outputResults();
+			//model.outputMLPResults();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+	
 			e.printStackTrace();
 		}
 
-
-
-
-
-
+ 
 	}
 
 
+	public void advancedBuild(File arffFile, int classIndex, int iterations, int attributeMethod, double ridge, int decimalPlaces) {
+
+		try {	
+
+			for(int i = 1; i <= iterations; i++) {
+				if(iterations > 1) {
+					System.out.println("Iteration: " + i );
+				}
 
 
+				splitTrainingSet(arffFile, classIndex);
 
-	public void advancedBuild() {
+				System.out.println("Training " + trainingInstances.numInstances() + " Test " + testInstances.numInstances()
+				+ "\r\n\r\nBuilding Classifier");
 
+				Classifier classifier = new LinearRegression();
+				
+				
+			
+				
+				((LinearRegression) classifier).setOptions(Utils.splitOptions("-S 0 -R 1.0E-8 -num-decimal-places 4"));
+
+				classifier.buildClassifier(trainingInstances);
+
+		//		model.saveEvaluation
+					
+//				model.saveEvaluation(testInstances, classifier,);
+
+			}
+
+//			model.outputResults();
+
+		} catch (Exception e) {
+	
+			e.printStackTrace();
+		}
 
 
 
@@ -99,7 +134,8 @@ public class Regression {
 		in = new InputStreamReader(is);
 		reader = new BufferedReader(in);
 		data = new Instances(reader);
-		// classIndex = data.numAttributes() - 1;
+		
+		
 		System.out.println(classIndex);
 		reader.close();
 		in.close();

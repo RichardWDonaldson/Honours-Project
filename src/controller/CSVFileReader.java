@@ -22,14 +22,14 @@ public class CSVFileReader {
 	Object[] columnNames;
 	transient CSVReader CSVFileReader;
 	
-	public void readCSV(File csvFileName, String arffFileName) throws IOException{
+	public boolean readCSV(File csvFileName, String arffFileName) throws IOException{
 		
 		File arffFile = new File(arffFileName);
 		
 		if(arffFile.exists()) {
 			arffFile.delete();
 		}
-		
+		try {
 		// load CSV
 	    CSVLoader loader = new CSVLoader();
 	    loader.setSource(csvFileName);
@@ -42,9 +42,15 @@ public class CSVFileReader {
 	    saver.setFile(new File(arffFileName));
 	//    saver.setDestination(new File(arffFileName));
 	    saver.writeBatch();
-	   	   
+	    
+	    
+	    
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	  
-		
+		return true;
 	}
 	
 public DefaultTableModel getTableModel(File file) {

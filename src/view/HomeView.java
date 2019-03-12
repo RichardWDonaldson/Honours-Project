@@ -25,10 +25,13 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 
 import controller.CSVFileReader;
+import controller.Forecaster;
 import controller.MLP;
 import controller.Regression;
 import controller.TestEvaluation;
+import model.AdvancedSettings;
 import model.Model;
+import model.RegressionSetting;
 
 import java.awt.Color;
 import java.awt.event.ActionListener;
@@ -39,12 +42,13 @@ import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class HomeView {
-
+	//TODO Add model saving https://stackoverflow.com/questions/33556543/how-to-save-model-and-apply-it-on-a-test-dataset-on-java 
+	//TODO change console output to JTextArea https://stackoverflow.com/questions/4443878/redirecting-system-out-to-jtextpane 
+	//TODO Clean up code in classes cause they all look a mess
 	private JFrame frmHonoursProject;
 	private JTextField txtTrainingIterations;
 	private JTextField txtStructure;
-	private JTextField textField_2;
-	private JTextField textField_3;
+	private JTextField txtDecimalPlaces;
 
 	Object[] productsList;
 	DefaultTableModel model;
@@ -54,13 +58,16 @@ public class HomeView {
 	Model mainModel = new Model();
 	int algorithmChoice = 0;
 	int advancedSettingsState;
+	int attributeSelection;
+
+	int numberOfPredictions;
+
 	private JTextField txtLearningRate;
 	private JTextField txtMomentum;
 	private JTextField txtValidationSize;
 	private JTextField txtValidationThreshold;
 	private JTextField txtSeed;
-	private JTextField textField_9;
-	private JTextField textField_10;
+	private JTextField txtRidge;
 	private JTable tblOutput;
 	private JTextField txtIterations;
 
@@ -85,7 +92,7 @@ public class HomeView {
 	 * Create the application.
 	 */
 	public HomeView() {
-	//	mainModel.populateEvaluation();
+		//	mainModel.populateEvaluation();
 		initialize();
 	}
 
@@ -135,9 +142,9 @@ public class HomeView {
 		tabbedPane.addTab("Settings", null, settingsPanel, null);
 		GridBagLayout gbl_settingsPanel = new GridBagLayout();
 		gbl_settingsPanel.columnWidths = new int[]{0, 0};
-		gbl_settingsPanel.rowHeights = new int[]{279, 0, 0};
+		gbl_settingsPanel.rowHeights = new int[]{201, 0, 0};
 		gbl_settingsPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_settingsPanel.rowWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+		gbl_settingsPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		settingsPanel.setLayout(gbl_settingsPanel);
 
 		JPanel mainSettingsPanel = new JPanel();
@@ -223,7 +230,7 @@ public class HomeView {
 		gbc_cbProduct.gridy = 1;
 		mainSettingsPanel.add(cbProduct, gbc_cbProduct);
 
-		JLabel Iterations = new JLabel("New label");
+		JLabel Iterations = new JLabel("Iterations");
 		GridBagConstraints gbc_Iterations = new GridBagConstraints();
 		gbc_Iterations.insets = new Insets(0, 0, 5, 5);
 		gbc_Iterations.anchor = GridBagConstraints.EAST;
@@ -263,17 +270,10 @@ public class HomeView {
 		JButton btnRun = new JButton("Run");
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+
 				String selectedOption = group.getSelection().getActionCommand();
 				int iterations;
 				String productName;
-
-				int productChoice = cbProduct.getSelectedIndex();
-				productName = (String) productsList[productChoice];
-
-
-				if(chckbxAdvancedSettings.isSelected() == true) {
-
-				}
 
 				if(txtIterations.getText().isEmpty()) {
 					iterations = 1;
@@ -281,28 +281,27 @@ public class HomeView {
 					iterations = Integer.parseInt(txtIterations.getText());
 				}
 
-
 				if(arffFile != null) {
+					int productChoice = cbProduct.getSelectedIndex();
+					productName = (String) productsList[productChoice];
+
 					if(productChoice != 0) {
 
 						try {
 							run(selectedOption, productName, iterations, productChoice);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
+
 							e.printStackTrace();
 						}	
 					} else {
 						//No product selected
+						JOptionPane.showMessageDialog(frmHonoursProject, "please select a product", "Error", JOptionPane.ERROR_MESSAGE);
 					}
-
-
 
 				} else {
 					//arffFile is null
 					JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 				}
-
-
 			}
 		});
 		GridBagConstraints gbc_btnRun = new GridBagConstraints();
@@ -456,13 +455,10 @@ public class HomeView {
 				tblOutput.setModel(model);
 				cbProduct.setModel(cbModel);
 
-
 			}
 		});
-		cardPanel.add(mlpCard, "MLP");
 
 		JPanel linearRegressionCard = new JPanel();
-		linearRegressionCard.setBorder(new LineBorder(new Color(0, 0, 0)));
 		//cardPanel.add(linearRegressionCard, "name_696205083138280");
 		GridBagLayout gbl_linearRegressionCard = new GridBagLayout();
 		gbl_linearRegressionCard.columnWidths = new int[]{0, 0, 0, 0, 0};
@@ -471,7 +467,7 @@ public class HomeView {
 		gbl_linearRegressionCard.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		linearRegressionCard.setLayout(gbl_linearRegressionCard);
 
-		JLabel lblNewLabel_2 = new JLabel("Linear");
+		JLabel lblNewLabel_2 = new JLabel("Attribute Selection");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
@@ -479,16 +475,25 @@ public class HomeView {
 		gbc_lblNewLabel_2.gridy = 1;
 		linearRegressionCard.add(lblNewLabel_2, gbc_lblNewLabel_2);
 
-		textField_2 = new JTextField();
-		GridBagConstraints gbc_textField_2 = new GridBagConstraints();
-		gbc_textField_2.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_2.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_2.gridx = 1;
-		gbc_textField_2.gridy = 1;
-		linearRegressionCard.add(textField_2, gbc_textField_2);
-		textField_2.setColumns(10);
+		JComboBox cbAttributeSelection = new JComboBox();
+		cbAttributeSelection.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				
+				attributeSelection = cbAttributeSelection.getSelectedIndex();
+				
+				
+				
+			}
+		});
+		cbAttributeSelection.setModel(new DefaultComboBoxModel(new String[] {"M5", "No Attribute", "Greedy"}));
+		GridBagConstraints gbc_cbAttributeSelection = new GridBagConstraints();
+		gbc_cbAttributeSelection.insets = new Insets(0, 0, 5, 5);
+		gbc_cbAttributeSelection.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cbAttributeSelection.gridx = 1;
+		gbc_cbAttributeSelection.gridy = 1;
+		linearRegressionCard.add(cbAttributeSelection, gbc_cbAttributeSelection);
 
-		JLabel lblNewLabel_3 = new JLabel("New label");
+		JLabel lblNewLabel_3 = new JLabel("Decimal Places");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
@@ -496,33 +501,34 @@ public class HomeView {
 		gbc_lblNewLabel_3.gridy = 1;
 		linearRegressionCard.add(lblNewLabel_3, gbc_lblNewLabel_3);
 
-		textField_3 = new JTextField();
-		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
-		gbc_textField_3.insets = new Insets(0, 0, 5, 0);
-		gbc_textField_3.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_3.gridx = 3;
-		gbc_textField_3.gridy = 1;
-		linearRegressionCard.add(textField_3, gbc_textField_3);
-		textField_3.setColumns(10);
+		txtDecimalPlaces = new JTextField();
+		GridBagConstraints gbc_txtDecimalPlaces = new GridBagConstraints();
+		gbc_txtDecimalPlaces.insets = new Insets(0, 0, 5, 0);
+		gbc_txtDecimalPlaces.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtDecimalPlaces.gridx = 3;
+		gbc_txtDecimalPlaces.gridy = 1;
+		linearRegressionCard.add(txtDecimalPlaces, gbc_txtDecimalPlaces);
+		txtDecimalPlaces.setColumns(10);
 
-		textField_9 = new JTextField();
-		GridBagConstraints gbc_textField_9 = new GridBagConstraints();
-		gbc_textField_9.insets = new Insets(0, 0, 0, 5);
-		gbc_textField_9.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_9.gridx = 1;
-		gbc_textField_9.gridy = 2;
-		linearRegressionCard.add(textField_9, gbc_textField_9);
-		textField_9.setColumns(10);
+		JLabel lblNewLabel_9 = new JLabel("Ridge");
+		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+		gbc_lblNewLabel_9.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_9.gridx = 0;
+		gbc_lblNewLabel_9.gridy = 2;
+		linearRegressionCard.add(lblNewLabel_9, gbc_lblNewLabel_9);
 
-		textField_10 = new JTextField();
-		GridBagConstraints gbc_textField_10 = new GridBagConstraints();
-		gbc_textField_10.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_10.gridx = 3;
-		gbc_textField_10.gridy = 2;
-		linearRegressionCard.add(textField_10, gbc_textField_10);
-		textField_10.setColumns(10);
+		txtRidge = new JTextField();
+		GridBagConstraints gbc_txtRidge = new GridBagConstraints();
+		gbc_txtRidge.insets = new Insets(0, 0, 0, 5);
+		gbc_txtRidge.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtRidge.gridx = 1;
+		gbc_txtRidge.gridy = 2;
+		linearRegressionCard.add(txtRidge, gbc_txtRidge);
+		txtRidge.setColumns(10);
 
 		cardPanel.add(linearRegressionCard, "Linear Regression");
+		cardPanel.add(mlpCard, "MLP");
 
 		GridBagConstraints gbc_btnLoadFile = new GridBagConstraints();
 		gbc_btnLoadFile.gridx = 0;
@@ -530,26 +536,19 @@ public class HomeView {
 		frmHonoursProject.getContentPane().add(btnLoadFile, gbc_btnLoadFile);
 
 		cbAlgorithm.addItemListener(new ItemListener() {
-
 			public void itemStateChanged(ItemEvent e) {
 				algorithmChoice = cbAlgorithm.getSelectedIndex();
-				//	System.out.println(algorithmChoice);
-
 				CardLayout cl = (CardLayout)(cardPanel.getLayout());
 				System.out.println(e.getItem());
 
 				cl.show(cardPanel, (String)  e.getItem());
-
 			}
-
-		}
-				);
+		});
 
 		chckbxAdvancedSettings.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 
 				advancedSettingsState = e.getStateChange();
-
 				if(e.getStateChange() == ItemEvent.SELECTED) {
 					//TODO Fill this out with Linear fields
 					//Advanced Settings enabled
@@ -560,9 +559,8 @@ public class HomeView {
 					txtStructure.setEditable(true);
 					txtValidationThreshold.setEditable(true);
 					txtValidationSize.setEditable(true);
-
-
 				} else {
+					//Advanced Settings disabled
 					txtTrainingIterations.setEditable(false);
 					txtLearningRate.setEditable(false);
 					txtMomentum.setEditable(false);
@@ -570,50 +568,41 @@ public class HomeView {
 					txtStructure.setEditable(false);
 					txtValidationThreshold.setEditable(false);
 					txtValidationSize.setEditable(false);
-
+					
 				}
 
 			}
 		});
-
-
-
 	}
 
 
-
-
-
-
-	public void loadFile() {
+	private void loadFile() {
 
 		final JFileChooser fc = new JFileChooser();
-
 		int returnValue = fc.showOpenDialog(frmHonoursProject);
 
 		if(returnValue == JFileChooser.APPROVE_OPTION) {
 			csvFile = fc.getSelectedFile();
-
 			if(csvFile != null) {
 				CSVFileReader csvReader = new CSVFileReader();
-
 				String extension = csvReader.getFileExtension(csvFile);
 
 				if(extension.equals(".csv")) {
 					try {
 						String arffFileName = csvFile.getName();
 						arffFileName.replace(".csv", ".arff");
-						csvReader.readCSV(csvFile, arffFileName );
+						boolean Success = csvReader.readCSV(csvFile, arffFileName );
+						if(Success) {
+							arffFile = new File(arffFileName);
+							//TODO fix type safety
 
-						arffFile = new File(arffFileName);
-						//TODO fix type safety
-
-						model = csvReader.getTableModel(csvFile);
-						productsList = (String[]) csvReader.getColumnNames();
-						cbModel = new DefaultComboBoxModel(productsList);
-
-
-
+							model = csvReader.getTableModel(csvFile);
+							productsList = (String[]) csvReader.getColumnNames();
+							cbModel = new DefaultComboBoxModel(productsList);
+						} else {
+							//Corrupt File, please try again
+							JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
+						}
 					} catch(IOException e) {
 						e.printStackTrace();
 					}
@@ -621,29 +610,20 @@ public class HomeView {
 					//File isn't correct format
 					JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 				}
-
 			} else {
 				//File is null
 				JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-
 		} else {
 			//error in file  choosing
 			JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-
-	}
-
-	public int getUserChoice(int algorithmChoice, String methodChoice, int advancedSettingsChoice) {
-		int choice = 0;
-
-		return choice;
 	}
 
 
 
 
-	public void run(String selectedOption, String productName, int iterations, int productChoice) throws Exception {
+	private void run(String selectedOption, String productName, int iterations, int productChoice) throws Exception {
 		//TODO Implement Linear Regression within the forecasting
 
 		switch(selectedOption) {
@@ -652,79 +632,92 @@ public class HomeView {
 				//linear regression
 				Regression regression = new Regression();
 				if(advancedSettingsState == 2) {
-					
+
 					regression.simpleBuild(arffFile, productChoice, iterations);
 				} else {
 					//Advanced Linear Regression
 					//TODO Implement this
+					//	advancedRegressionBuild();
 				}
-				
-				
-				
-				
+
 			} else if(algorithmChoice == 1) {
 				MLP mlp = new MLP();
-
 				if(advancedSettingsState == 2) {
 					mlp.simpleBuild(arffFile, productChoice, iterations);	
-
-
 				} else {
 					System.out.println("Advanced Build has been selected");
-					advancedBuild(mlp, arffFile, productChoice, iterations);
-
-
+					//advancedBuild(mlp, arffFile, productChoice, iterations);
 				}
-
-				//MLP
 			} else {
 				//Error
+				JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			break;
-
 		case "2": //Forecasting
 			System.out.println("Forecasting is selected");
+			Forecaster forecaster = new Forecaster();
+			int numberOfPredictions = 5;
 			if(algorithmChoice == 0) {
+				if(advancedSettingsState == 2) {
+					forecaster.regressionSimpleForecast(arffFile, productName, productChoice, iterations, numberOfPredictions);
+				} else {
+					double ridge = Double.parseDouble(txtRidge.getText());
+					
+					int decimalPlaces = Integer.parseInt(txtDecimalPlaces.getText());
+					
+					
+					RegressionSetting settings = new RegressionSetting(ridge, decimalPlaces, attributeSelection);
+					
+					forecaster.regressionAdvancedBuild(arffFile, productName, productChoice, iterations, settings, numberOfPredictions);
+				}
+				
+				
+				
+				
 				//Linear Regression Forecasting
+				
 			} else if(algorithmChoice == 1) {
 				//MLP Forecasting
+				if(advancedSettingsState == 2) {
+					//simple
+					forecaster.mlpSimpleForecast(arffFile, productName, productChoice, iterations, numberOfPredictions);
+				} else {
+					//advanced
+					advancedBuild(forecaster, arffFile, productChoice, productName, iterations, numberOfPredictions);
+				}	
 			} else {
 				//Error
+				JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			break;
-
 		case "3": //Evaluation
 			System.out.println("Evaluation is selected");
 			TestEvaluation evaluations = new TestEvaluation();
-			
-			
 			if(algorithmChoice == 0) {
 				//Linear Regression
-				evaluations.regressionEvaluation(arffFile, productChoice, iterations);
+				numberOfPredictions = 5;
+				evaluations.regressionEvaluation(arffFile, productName, productChoice, iterations, numberOfPredictions);
+				
+				
 			} else if(algorithmChoice == 1) {
-				evaluations.mlpEvaluation(arffFile, productChoice, iterations);
+				//MLP 
+				numberOfPredictions = 5;
+				evaluations.mlpEvaluation(arffFile, productName, productChoice, iterations, numberOfPredictions);
 			} else {
 				//error
+				JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			
-
-			//TODO implement this section
-			//this section is going to automatically run the advanced Machine learning methods changing the settings so 
-			//other elements can be compared graphically, e.g. structure of the network 
 			break;
-
 		default: //No radio button selected
 			//Error
 			JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error", JOptionPane.ERROR_MESSAGE);
 			break;
 
 		}
-
-
 	}
 
-	public void advancedBuild(MLP mlp, File arffFile, int classIndex, int iterations) {
-		double trainingIterations = Double.parseDouble(txtTrainingIterations.getText());
+	private void advancedBuild(Forecaster forecaster, File arffFile, int classIndex, String productName, int iterations, int numberOfPreductions) {
+		double trainingTime = Double.parseDouble(txtTrainingIterations.getText());
 		double learningRate = Double.parseDouble(txtLearningRate.getText());
 		double momentum = Double.parseDouble(txtMomentum.getText());
 		double seed = Double.parseDouble(txtSeed.getText());
@@ -732,14 +725,18 @@ public class HomeView {
 		double validationThreshold = Double.parseDouble(txtValidationThreshold.getText());
 		double validationSize = Double.parseDouble(txtValidationSize.getText());
 
+		//String structure, double iterations, double learningRate, double momentum, double seed double validationThreshold, double validationSize
 
+		AdvancedSettings settings = new AdvancedSettings(structure, trainingTime, learningRate, momentum, seed, validationThreshold, validationSize);
+
+		forecaster.mlpAdvancedForecast(arffFile, productName, classIndex, iterations, settings, numberOfPredictions);
 
 		//iterations, learningRate, momentum, seed, structure, validationThreshold, validationSize, file, classIndex
-		mlp.advancedBuild(trainingIterations, learningRate, momentum, seed, structure, validationThreshold, validationSize, arffFile, classIndex, iterations);
-
-
+		//		mlp.advancedBuild(trainingIterations, learningRate, momentum, seed, structure, validationThreshold, validationSize, arffFile, classIndex, iterations);
 
 	}
+
+
 
 
 

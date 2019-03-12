@@ -359,7 +359,7 @@ public class CSVView {
 							
 							
 						//	panel_1.setVisible(true);
-							//TODO optimize code
+							
 							txtTrainingIterations.setEditable(true);
 							txtLearningRate.setEditable(true);
 							txtMomentum.setEditable(true);
@@ -388,7 +388,7 @@ public class CSVView {
 				JButton btnRun = new JButton("Run");
 				btnRun.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
-					//TODO Add advanced Settings check
+				
 						int iterations;
 						String productName;
 						
@@ -442,8 +442,8 @@ public class CSVView {
 										
 										//Loading the model Classifier cls = (Classifier) weka.core.SerializationHelper.read("/some/where/j48.model"); 
 										
-									//TODO Look into whether it's taking it in as 52 or if it's running it one week at a time 	
-										forecast.getForecast(arffFile, productName, productChoice);
+							
+									//	forecast.getForecast(arffFile, productName, productChoice);
 										
 										
 										
@@ -501,7 +501,7 @@ public class CSVView {
 							csvReader.readCSV(csvFile, "placeholder.arff");
 						
 							arffFile = new File("placeholder.arff");	
-							//TODO Look at fixing type safety
+						
 								DefaultTableModel model = csvReader.getTableModel(csvFile);
 								productsList = (String[]) csvReader.getColumnNames();
 								DefaultComboBoxModel cbModel = new DefaultComboBoxModel(productsList);
@@ -512,7 +512,7 @@ public class CSVView {
 								tblOutput.setModel(model);
 								cbProduct.setModel(cbModel);
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
+								
 								e.printStackTrace();
 							}
 				

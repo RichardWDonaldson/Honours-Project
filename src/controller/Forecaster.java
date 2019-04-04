@@ -6,148 +6,81 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import model.AdvancedSettings;
 import model.ChartSettings;
 import model.Model;
 import model.RegressionSetting;
-import view.ChartView;
+import model.Result;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.filters.Filter;
 import weka.filters.supervised.attribute.TSLagMaker;
-import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.timeseries.WekaForecaster;
-import weka.classifiers.timeseries.eval.MAEModule;
-import weka.classifiers.timeseries.eval.TSEvalModule;
-import weka.classifiers.timeseries.eval.TSEvaluation;
-
 
 public class Forecaster {
-	//TODO Create graph that outputs forecast, outputs the dataset and then the forecast
-	//TODO Look at All but One Validation
-	//TODO sort the dataset so there are more instances
-	
-
-	Instances trainingInstances;
-	Instances testInstances;
-
 	Model model = new Model();
 
-	public void mlpSimpleForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations, int numberOfPredictions) {
+	public void mlpSimpleForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations,
+			int numberOfPredictions) {
 		try {
+			Instances train = null;
+			Instances test = null;
+			ArrayList<Result> meanResults = new ArrayList<Result>();
+			for (int i = 1; i <= iterations; i++) {
+				ArrayList<Result> foldResults = new ArrayList<Result>();
+				Instances data = getInstances(arffFile.getName(), classIndex);
 
-			for(int i = 1; i <= iterations; i++) {
+				Random generator = new Random(System.currentTimeMillis());
 
-				splitTrainingSet(arffFile, classIndex);
+				Instances randData = new Instances(data);
+				MultilayerPerceptron classifier = new MultilayerPerceptron();
+				randData.randomize(generator);
+				int folds = randData.size();
+				Evaluation eval = new Evaluation(randData);
+				for (int n = 0; n < folds; n++) {
+					train = randData.trainCV(folds, n, generator);
+					test = randData.testCV(folds, n);
 
-				MultilayerPerceptron multiLayerPerceptron = new MultilayerPerceptron();
-				multiLayerPerceptron.buildClassifier(trainingInstances);
+					AdvancedSettings settings = null;
+					classifier.buildClassifier(train);
+					eval.evaluateModel(classifier, test);
 
-				WekaForecaster forecaster = new WekaForecaster();
-				forecaster.setFieldsToForecast(fieldsToForecast);
-				forecaster.setBaseForecaster(multiLayerPerceptron);
-				forecaster.buildForecaster(trainingInstances, System.out);
-				forecaster.primeForecaster(trainingInstances);
+					Result result = new Result(settings, eval.correlationCoefficient(), eval.meanAbsoluteError(),
+							eval.rootMeanSquaredError(), eval.relativeAbsoluteError(), eval.rootRelativeSquaredError(),
 
-				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
+							eval.numInstances());
 
-				for(int j = 0; j < numberOfPredictions; j++) {
+					foldResults.add(result);
+					System.out.println(eval.toSummaryString("=== " + folds + "-fold Cross-validation ===", false));
 
-					List<NumericPrediction> predsAtStep = forecast.get(j);
-					NumericPrediction predForTarget = predsAtStep.get(0);
-
-					System.out.println("" + predForTarget.predicted() + " ");
-				}
-				// evaluate on test data
-				System.out.println("Evaluating Model on Test Set");
-
-				model.saveEvaluation(testInstances, multiLayerPerceptron, null);
-
-			}
-
-			
-
-			ChartSettings chartSettings = new ChartSettings("Forecast",fieldsToForecast,"Iteration","");
-			
-			
-			model.outputMLPResults(chartSettings, null);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			e.getMessage();
-		}
-	}
-
-	public void mlpAdvancedForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations, AdvancedSettings settings, int numberOfPredictions) {
-		try {
-			for(int i = 0; i <= iterations; i++) {
-
-				splitTrainingSet(arffFile, classIndex);
-
-				MultilayerPerceptron multiLayerPerceptron = new MultilayerPerceptron();
-
-				multiLayerPerceptron.setHiddenLayers(settings.getStructure());
-				multiLayerPerceptron.setTrainingTime((int) settings.getIterations());
-				multiLayerPerceptron.setLearningRate(settings.getLearningRate());
-				multiLayerPerceptron.setValidationSetSize((int) settings.getValidationSize());
-				multiLayerPerceptron.setValidationThreshold((int) settings.getValidationThreshold());
-				multiLayerPerceptron.setMomentum(settings.getMomentum());
-				multiLayerPerceptron.setSeed((int) settings.getSeed());
-
-				WekaForecaster forecaster = new WekaForecaster();	
-
-				forecaster.setFieldsToForecast(fieldsToForecast);
-				forecaster.setBaseForecaster(multiLayerPerceptron);
-				forecaster.buildForecaster(trainingInstances, System.out);
-				forecaster.primeForecaster(trainingInstances);
-
-				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
-
-				for(int j = 0; j < numberOfPredictions; i++) {
-					List<NumericPrediction> predsAtStep = forecast.get(i);
-					NumericPrediction predForTarget = predsAtStep.get(0);
-
-					System.out.println("" + predForTarget.predicted() + " ");
 				}
 
-				model.saveEvaluation(testInstances, multiLayerPerceptron, settings);
-			}
-			
-			ChartSettings chartSettings = new ChartSettings("Forecast",fieldsToForecast,"Iteration","");
-			
-			model.outputMLPResults(chartSettings, settings);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
-	}
+				int count = foldResults.size();
 
-	public void regressionSimpleForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations, int numberOfPredictions) {
-		try {
-			
-			for(int i = 1; i <= iterations; i++) {
+				Result sumResult = calculateSumResult(foldResults, null);
 
-				splitTrainingSet(arffFile, classIndex);
+				Result meanResult = calculateMeanResult(sumResult, count);
 
-				LinearRegression linearRegression = new LinearRegression();
-				linearRegression.buildClassifier(trainingInstances);
+				meanResults.add(meanResult);
 
-
+				// Actual Forecast
 				WekaForecaster forecaster = new WekaForecaster();
 				forecaster.setFieldsToForecast(fieldsToForecast);
-				forecaster.setBaseForecaster(linearRegression);
-				forecaster.buildForecaster(trainingInstances, System.out);
-				forecaster.primeForecaster(trainingInstances);
+				forecaster.setBaseForecaster(classifier);
+				forecaster.buildForecaster(train, System.out);
+				forecaster.primeForecaster(train);
 
 				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
 
-				for(int j = 0; j < numberOfPredictions; j++) {
+				for (int j = 0; j < numberOfPredictions; j++) {
 
 					List<NumericPrediction> predsAtStep = forecast.get(j);
 					NumericPrediction predForTarget = predsAtStep.get(0);
@@ -155,45 +88,83 @@ public class Forecaster {
 					System.out.println("" + predForTarget.predicted() + " ");
 				}
 
-				model.saveEvaluation(testInstances, linearRegression, null);
-
 			}
-			ChartSettings chartSettings = new ChartSettings("Forecast",fieldsToForecast,"Iteration","");
-			model.outputRegressionResults(chartSettings, null);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			e.getMessage();
+			ChartSettings chartSettings = new ChartSettings("Forecast", fieldsToForecast, "Iteration", "");
+
+			model.outputMLPResults(chartSettings, null, meanResults);
+
+//			for (Result result : meanResults) {
+//				System.out.println("RESULT: ");
+//				System.out.println(result.toString());
+//			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-
 
 	}
 
-	public void regressionAdvancedBuild(File arffFile, String fieldsToForecast, int classIndex, int iterations, RegressionSetting settings, int numberOfPredictions) {
-
-		String tempRidge = " -R " + Double.toString(settings.getRidge());
-		String tempDecimalPlaces = " -num-decimal-places " + Integer.toString(settings.getDecimalPlaces());
-		String tempAttributeSelection = " -S " + Integer.toString(settings.getAttributeSelectionMethod());
-
+	public void mlpAdvancedForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations,
+			AdvancedSettings settings, int numberOfPredictions) {
 		try {
+			Instances train = null;
+			Instances test = null;
+			ArrayList<Result> meanResults = new ArrayList<Result>();
+			for (int i = 1; i <= iterations; i++) {
+				ArrayList<Result> foldResults = new ArrayList<Result>();
+				Instances data = getInstances(arffFile.getName(), classIndex);
 
-			for(int i = 1; i <= iterations; i++) {
+				Random generator = new Random(System.currentTimeMillis());
 
-				splitTrainingSet(arffFile, classIndex);
+				Instances randData = new Instances(data);
+				MultilayerPerceptron classifier = new MultilayerPerceptron();
+				
+				classifier.setHiddenLayers(settings.getStructure());
+				classifier.setTrainingTime((int) settings.getIterations());
+				classifier.setLearningRate(settings.getLearningRate());
+				classifier.setValidationSetSize((int) settings.getValidationSize());
+				classifier.setValidationThreshold((int) settings.getValidationThreshold());
+				classifier.setMomentum(settings.getMomentum());
+				classifier.setSeed((int) settings.getSeed());
 
-				LinearRegression linearRegression = new LinearRegression();	
-				((LinearRegression) linearRegression).setOptions(Utils.splitOptions(tempAttributeSelection + tempRidge + tempDecimalPlaces));
-				linearRegression.buildClassifier(trainingInstances);
+				randData.randomize(generator);
+				int folds = randData.size();
+				Evaluation eval = new Evaluation(randData);
+				for (int n = 0; n < folds; n++) {
+					train = randData.trainCV(folds, n, generator);
+					test = randData.testCV(folds, n);
 
+					classifier.buildClassifier(train);
+					eval.evaluateModel(classifier, test);
+
+					Result result = new Result(settings, eval.correlationCoefficient(), eval.meanAbsoluteError(),
+							eval.rootMeanSquaredError(), eval.relativeAbsoluteError(), eval.rootRelativeSquaredError(),
+
+							eval.numInstances());
+
+					foldResults.add(result);
+					System.out.println(eval.toSummaryString("=== " + folds + "-fold Cross-validation ===", false));
+
+				}
+				int count = foldResults.size();
+
+				Result sumResult = calculateSumResult(foldResults, null);
+
+				Result meanResult = calculateMeanResult(sumResult, count);
+
+				meanResults.add(meanResult);
+
+				// Actual Forecast
 				WekaForecaster forecaster = new WekaForecaster();
 				forecaster.setFieldsToForecast(fieldsToForecast);
-				forecaster.setBaseForecaster(linearRegression);
-				forecaster.buildForecaster(trainingInstances, System.out);
-				forecaster.primeForecaster(trainingInstances);
+				forecaster.setBaseForecaster(classifier);
+				forecaster.buildForecaster(train, System.out);
+				forecaster.primeForecaster(train);
 
 				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
 
-				for(int j = 0; j < numberOfPredictions; j++) {
+				for (int j = 0; j < numberOfPredictions; j++) {
 
 					List<NumericPrediction> predsAtStep = forecast.get(j);
 					NumericPrediction predForTarget = predsAtStep.get(0);
@@ -201,37 +172,205 @@ public class Forecaster {
 					System.out.println("" + predForTarget.predicted() + " ");
 				}
 
-				model.saveEvaluation(testInstances, linearRegression, null);
-
 			}
+			ChartSettings chartSettings = new ChartSettings("Forecast", fieldsToForecast, "Iteration", "");
 
-			
-			ChartSettings chartSettings = new ChartSettings("Forecast",fieldsToForecast,"Iteration","Value");
-			model.outputRegressionResults(chartSettings, settings);
+			model.outputMLPResults(chartSettings, settings, meanResults);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			e.getMessage();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
 	}
 
-	private void splitTrainingSet(File arffFile, int classIndex) throws Exception {
+	public void regressionSimpleForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations,
+			int numberOfPredictions) {
+		try {
+			Instances train = null;
+			Instances test = null;
+			ArrayList<Result> meanResults = new ArrayList<Result>();
+			for (int i = 1; i <= iterations; i++) {
+				ArrayList<Result> foldResults = new ArrayList<Result>();
+				Instances data = getInstances(arffFile.getName(), classIndex);
 
-		Instances data = getInstances(arffFile.getName(), classIndex);
+				Random generator = new Random(System.currentTimeMillis());
 
-		// randomise the data.
-		long seed = System.currentTimeMillis();
-		Random rand = new Random(seed);
-		data.randomize(rand);
-		double trainingSetRatio = 0.661;
-		int dataSize = data.numInstances();
-		int trainingSize = (int) Math.ceil(dataSize * trainingSetRatio);
-		int testSize = dataSize - trainingSize;
+				Instances randData = new Instances(data);
+				LinearRegression classifier = new LinearRegression();
+				randData.randomize(generator);
+				int folds = randData.size();
+				Evaluation eval = new Evaluation(randData);
+				for (int n = 0; n < folds; n++) {
+					train = randData.trainCV(folds, n, generator);
+					test = randData.testCV(folds, n);
 
-		// actual split
-		trainingInstances = new Instances(data, 0, trainingSize);
-		testInstances = new Instances(data, trainingSize, testSize);
+					AdvancedSettings settings = null;
+					
+					classifier.buildClassifier(train);
+					eval.evaluateModel(classifier, test);
+
+					Result result = new Result(settings, eval.correlationCoefficient(), eval.meanAbsoluteError(),
+							eval.rootMeanSquaredError(), eval.relativeAbsoluteError(), eval.rootRelativeSquaredError(),
+
+							eval.numInstances());
+
+					foldResults.add(result);
+					System.out.println(eval.toSummaryString("=== " + folds + "-fold Cross-validation ===", false));
+
+				}
+
+				int count = foldResults.size();
+
+				Result sumResult = calculateSumResult(foldResults, null);
+
+				Result meanResult = calculateMeanResult(sumResult, count);
+
+				meanResults.add(meanResult);
+
+				// Actual Forecast
+				WekaForecaster forecaster = new WekaForecaster();
+				forecaster.setFieldsToForecast(fieldsToForecast);
+				forecaster.setBaseForecaster(classifier);
+				forecaster.buildForecaster(train, System.out);
+				forecaster.primeForecaster(train);
+
+				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
+
+				for (int j = 0; j < numberOfPredictions; j++) {
+
+					List<NumericPrediction> predsAtStep = forecast.get(j);
+					NumericPrediction predForTarget = predsAtStep.get(0);
+
+					System.out.println("" + predForTarget.predicted() + " ");
+				}
+
+			}
+
+			ChartSettings chartSettings = new ChartSettings("Forecast", fieldsToForecast, "Iteration", "");
+
+			model.outputMLPResults(chartSettings, null, meanResults);
+			
+//			for (Result result : meanResults) {
+//				System.out.println("RESULT: ");
+//				System.out.println(result.toString());
+//			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	public void regressionAdvancedForecast(File arffFile, String fieldsToForecast, int classIndex, int iterations,
+			RegressionSetting settings, int numberOfPredictions) {
+		try {
+			Instances train = null;
+			Instances test = null;
+			ArrayList<Result> meanResults = new ArrayList<Result>();
+			String tempRidge = " -R " + Double.toString(settings.getRidge());
+			String tempDecimalPlaces = " -num-decimal-places " + Integer.toString(settings.getDecimalPlaces());
+			String tempAttributeSelection = " -S " + Integer.toString(settings.getAttributeSelectionMethod());
+
+			for (int i = 1; i <= iterations; i++) {
+				ArrayList<Result> foldResults = new ArrayList<Result>();
+				Instances data = getInstances(arffFile.getName(), classIndex);
+
+				Random generator = new Random(System.currentTimeMillis());
+
+				Instances randData = new Instances(data);
+				LinearRegression classifier = new LinearRegression();
+				((LinearRegression) classifier)
+						.setOptions(Utils.splitOptions(tempAttributeSelection + tempRidge + tempDecimalPlaces));
+
+				randData.randomize(generator);
+				int folds = randData.size();
+				Evaluation eval = new Evaluation(randData);
+				for (int n = 0; n < folds; n++) {
+					train = randData.trainCV(folds, n, generator);
+					test = randData.testCV(folds, n);
+
+					classifier.buildClassifier(train);
+					eval.evaluateModel(classifier, test);
+
+					Result result = new Result(settings, eval.correlationCoefficient(), eval.meanAbsoluteError(),
+							eval.rootMeanSquaredError(), eval.relativeAbsoluteError(), eval.rootRelativeSquaredError(),
+
+							eval.numInstances());
+
+					foldResults.add(result);
+					System.out.println(eval.toSummaryString("=== " + folds + "-fold Cross-validation ===", false));
+
+				}
+				int count = foldResults.size();
+
+				Result sumResult = calculateSumResult(foldResults, null);
+
+				Result meanResult = calculateMeanResult(sumResult, count);
+
+				meanResults.add(meanResult);
+
+				// Actual Forecast
+				WekaForecaster forecaster = new WekaForecaster();
+				forecaster.setFieldsToForecast(fieldsToForecast);
+				forecaster.setBaseForecaster(classifier);
+				forecaster.buildForecaster(train, System.out);
+				forecaster.primeForecaster(train);
+
+				List<List<NumericPrediction>> forecast = forecaster.forecast(numberOfPredictions, System.out);
+				System.out.println("===FORECAST===");
+				for (int j = 0; j < numberOfPredictions; j++) {
+
+					List<NumericPrediction> predsAtStep = forecast.get(j);
+					NumericPrediction predForTarget = predsAtStep.get(0);
+
+					System.out.println("" + predForTarget.predicted() + " ");
+				}
+
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	private Result calculateSumResult(ArrayList<Result> results, AdvancedSettings settings) {
+
+		double correlationCoefficient = 0;
+		double meanAbsoluteError = 0;
+		double rootMeanSquaredError = 0;
+		double relativeAbsoluteError = 0;
+		double rootRelativeSquaredError = 0;
+		double instances = 0;
+
+		for (Result result : results) {
+			correlationCoefficient += result.getCorrelationCoefficient();
+			meanAbsoluteError += result.getMeanAbsoluteError();
+			rootMeanSquaredError += result.getRootMeanSquaredError();
+			relativeAbsoluteError += result.getRelativeAbsoluteError();
+			rootRelativeSquaredError += result.getRootRelativeSquaredError();
+			instances += result.getInstances();
+		}
+
+		Result sumResult = new Result(settings, correlationCoefficient, meanAbsoluteError, rootMeanSquaredError,
+				relativeAbsoluteError, rootRelativeSquaredError, instances);
+
+		return sumResult;
+
+	}
+
+	private Result calculateMeanResult(Result result, int count) {
+		double tempCorrelationCoefficient = result.getCorrelationCoefficient() / count;
+		double tempMeanAbsoluteError = result.getMeanAbsoluteError() / count;
+		double tempRootMeanSquaredError = result.getRootMeanSquaredError() / count;
+		double tempRelativeAbsoluteError = result.getRelativeAbsoluteError() / count;
+		double tempRootRelativeSquaredError = result.getRootRelativeSquaredError() / count;
+
+		Result meanResult = new Result(result.getSettings(), tempCorrelationCoefficient, tempMeanAbsoluteError,
+				tempRootMeanSquaredError, tempRelativeAbsoluteError, tempRootRelativeSquaredError,
+				result.getInstances());
+		return meanResult;
+
 	}
 
 	private static Instances getInstances(String filename, int classIndex) throws Exception {
@@ -252,4 +391,23 @@ public class Forecaster {
 		return data;
 	}
 
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

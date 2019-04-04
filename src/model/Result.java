@@ -1,7 +1,5 @@
 package model;
 
-import weka.core.Instances;
-
 public class Result {
 
 	AdvancedSettings settings;
@@ -111,6 +109,8 @@ public class Result {
 	}
 	
 	public double getInstances() {
+	
+		
 		return instances;
 	}
 
@@ -126,7 +126,7 @@ public class Result {
 		//TODO Fix toString so it outputs in the format I want	
 		//TODO output appropriate d.p.
 		return "CorrelationCoefficient=\t\t" 
-		+ correlationCoefficient 
+		+ correlationCoefficient
 		+ ", \nmeanAbsoluteError=\t\t" 
 		+ meanAbsoluteError
 		+ ", \nrootMeanSquredError=\t\t" 
@@ -134,7 +134,7 @@ public class Result {
 		+ ", \nrelativeAbsoluteError=\t\t" 
 		+ relativeAbsoluteError
 		+ ", \nrootRelativeSquredError=\t\t" 
-		+ rootRelativeSquaredError 
+		+ rootRelativeSquaredError
 		+ ", \ninstances=\t\t" 
 		+ instances; 
 

@@ -29,6 +29,8 @@ import controller.TestEvaluation;
 import model.AdvancedSettings;
 import model.Model;
 import model.RegressionSetting;
+import weka.classifiers.Classifier;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -36,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 
 public class HomeView {
@@ -67,6 +70,9 @@ public class HomeView {
 	private JTable tblOutput;
 	private JTextField txtIterations;
 
+	private ArrayList<JTextField> mlpInput = new ArrayList<JTextField>();
+	private ArrayList<JTextField> regressionInput = new ArrayList<JTextField>();
+
 	/**
 	 * Launch the application.
 	 */
@@ -76,9 +82,7 @@ public class HomeView {
 				try {
 					HomeView window = new HomeView();
 					window.frmHonoursProject.setVisible(true);
-					// TODO fix this
-				//	PrintStream out = new PrintStream(new FileOutputStream("Default Linear All Products.txt"));
-				//	System.setOut(out);
+
 					// ConsoleView console = new ConsoleView();
 					// console.main();
 				} catch (Exception e) {
@@ -92,8 +96,8 @@ public class HomeView {
 	 * Create the application.
 	 */
 	public HomeView() {
-		// mainModel.populateEvaluation();
 		initialize();
+		generateInputArrays();
 	}
 
 	/**
@@ -257,7 +261,7 @@ public class HomeView {
 		JButton btnRun = new JButton("Run");
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-//TODO Fix Radio button selection
+
 				String selectedOption = group.getSelection().getActionCommand();
 				int iterations;
 				String productName;
@@ -448,7 +452,7 @@ public class HomeView {
 		});
 
 		JPanel linearRegressionCard = new JPanel();
-		// cardPanel.add(linearRegressionCard, "name_696205083138280");
+
 		GridBagLayout gbl_linearRegressionCard = new GridBagLayout();
 		gbl_linearRegressionCard.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gbl_linearRegressionCard.rowHeights = new int[] { 0, 0, 0, 0 };
@@ -539,29 +543,44 @@ public class HomeView {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					// TODO Fill this out with Linear fields
 					// Advanced Settings enabled
-					txtTrainingIterations.setEditable(true);
-					txtLearningRate.setEditable(true);
-					txtMomentum.setEditable(true);
-					txtSeed.setEditable(true);
-					txtStructure.setEditable(true);
-					txtValidationThreshold.setEditable(true);
-					txtValidationSize.setEditable(true);
-					txtDecimalPlaces.setEditable(true);
-					txtRidge.setEditable(true);
-					cbAlgorithm.setEditable(true);
+					
+					for(JTextField textbox : mlpInput) {
+					textbox.setEditable(true);	
+					}
+					for(JTextField textbox : regressionInput) {
+						textbox.setEditable(true);	
+						}
+//					
+//					txtTrainingIterations.setEditable(true);
+//					txtLearningRate.setEditable(true);
+//					txtMomentum.setEditable(true);
+//					txtSeed.setEditable(true);
+//					txtStructure.setEditable(true);
+//					txtValidationThreshold.setEditable(true);
+//					txtValidationSize.setEditable(true);
+//					txtDecimalPlaces.setEditable(true);
+//					txtRidge.setEditable(true);
+//					cbAlgorithm.setEditable(true);
 
 				} else {
 					// Advanced Settings disabled
-					txtTrainingIterations.setEditable(false);
-					txtLearningRate.setEditable(false);
-					txtMomentum.setEditable(false);
-					txtSeed.setEditable(false);
-					txtStructure.setEditable(false);
-					txtValidationThreshold.setEditable(false);
-					txtValidationSize.setEditable(false);
-					txtDecimalPlaces.setEditable(false);
-					txtRidge.setEditable(false);
-					cbAlgorithm.setEditable(false);
+					for(JTextField textbox : mlpInput) {
+						textbox.setEditable(false);	
+						}
+					for(JTextField textbox : regressionInput) {
+						textbox.setEditable(false);	
+						}
+					
+//					txtTrainingIterations.setEditable(false);
+//					txtLearningRate.setEditable(false);
+//					txtMomentum.setEditable(false);
+//					txtSeed.setEditable(false);
+//					txtStructure.setEditable(false);
+//					txtValidationThreshold.setEditable(false);
+//					txtValidationSize.setEditable(false);
+//					txtDecimalPlaces.setEditable(false);
+//					txtRidge.setEditable(false);
+//					cbAlgorithm.setEditable(false);
 
 				}
 
@@ -660,16 +679,17 @@ public class HomeView {
 				// Linear Regression
 				numberOfPredictions = 5;
 				evaluations.regressionEvaluation(arffFile, productName, productChoice, iterations, numberOfPredictions);
-				//evaluations.allProductsRegressionEvaluation(arffFile, fieldsToForecast, iterations, numberOfPredictions);
+				// evaluations.allProductsRegressionEvaluation(arffFile, fieldsToForecast,
+				// iterations, numberOfPredictions);
 			} else if (algorithmChoice == 1) {
 				// MLP
 				numberOfPredictions = 5;
-				//evaluations.allProductsMLPEvaluation(arffFile, fieldsToForecast, iterations, numberOfPredictions);
-				
-				 evaluations.mlpEvaluation(arffFile, productName, productChoice, iterations,
-			 numberOfPredictions);
-				 JOptionPane.showMessageDialog(frmHonoursProject, "Finished my dude", "Thank God",
-							JOptionPane.PLAIN_MESSAGE);
+				// evaluations.allProductsMLPEvaluation(arffFile, fieldsToForecast, iterations,
+				// numberOfPredictions);
+
+				evaluations.mlpEvaluation(arffFile, productName, productChoice, iterations, numberOfPredictions);
+				JOptionPane.showMessageDialog(frmHonoursProject, "Finished my dude", "Thank God",
+						JOptionPane.PLAIN_MESSAGE);
 			} else {
 				// error
 				JOptionPane.showMessageDialog(frmHonoursProject, "arff File is null", "Error",
@@ -694,9 +714,6 @@ public class HomeView {
 		double validationThreshold = Double.parseDouble(txtValidationThreshold.getText());
 		double validationSize = Double.parseDouble(txtValidationSize.getText());
 
-		// String structure, double iterations, double learningRate, double momentum,
-		// double seed double validationThreshold, double validationSize
-
 		AdvancedSettings settings = new AdvancedSettings(structure, trainingTime, learningRate, momentum, seed,
 				validationThreshold, validationSize);
 
@@ -707,6 +724,45 @@ public class HomeView {
 		// mlp.advancedBuild(trainingIterations, learningRate, momentum, seed,
 		// structure, validationThreshold, validationSize, arffFile, classIndex,
 		// iterations);
+
+	}
+
+	private void generateInputArrays() {
+
+		mlpInput.add(txtTrainingIterations);
+		mlpInput.add(txtMomentum);
+		mlpInput.add(txtLearningRate);
+		mlpInput.add(txtValidationThreshold);
+		mlpInput.add(txtValidationSize);
+		mlpInput.add(txtSeed);
+		mlpInput.add(txtStructure);
+
+		regressionInput.add(txtRidge);
+		regressionInput.add(txtDecimalPlaces);
+
+	}
+
+	private boolean validateInput(int algorithmChoice) {
+
+		switch (algorithmChoice) {
+		case 0:
+			for (JTextField textbox : regressionInput) {
+				if (textbox.getText().isEmpty()) {
+					return false;
+				}
+			}
+			break;
+		case 1:
+			for (JTextField textbox : mlpInput) {
+				if (textbox.getText().isEmpty()) {
+					return false;
+				}
+			}
+			break;
+		default:
+			return false;
+		}
+		return true;
 
 	}
 

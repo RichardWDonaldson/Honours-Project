@@ -26,9 +26,9 @@ import javax.swing.table.DefaultTableModel;
 import controller.CSVFileReader;
 import controller.Forecaster;
 import controller.TestEvaluation;
-import model.AdvancedSettings;
+import model.MLP;
 import model.Model;
-import model.RegressionSetting;
+import model.Regression;
 import weka.classifiers.Classifier;
 
 import java.awt.event.ActionListener;
@@ -651,7 +651,7 @@ public class HomeView {
 					double ridge = Double.parseDouble(txtRidge.getText());
 					int decimalPlaces = Integer.parseInt(txtDecimalPlaces.getText());
 
-					RegressionSetting settings = new RegressionSetting(ridge, decimalPlaces, attributeSelection);
+					Regression settings = new Regression(ridge, decimalPlaces, attributeSelection);
 
 					forecaster.regressionAdvancedForecast(arffFile, productName, productChoice, iterations, settings,
 							numberOfPredictions);
@@ -714,7 +714,7 @@ public class HomeView {
 		double validationThreshold = Double.parseDouble(txtValidationThreshold.getText());
 		double validationSize = Double.parseDouble(txtValidationSize.getText());
 
-		AdvancedSettings settings = new AdvancedSettings(structure, trainingTime, learningRate, momentum, seed,
+		MLP settings = new MLP(structure, trainingTime, learningRate, momentum, seed,
 				validationThreshold, validationSize);
 
 		forecaster.mlpAdvancedForecast(arffFile, productName, classIndex, iterations, settings, numberOfPredictions);

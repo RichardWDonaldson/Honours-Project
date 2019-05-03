@@ -2,8 +2,8 @@ package model;
 
 public class Result {
 
-	AdvancedSettings settings;
-	RegressionSetting regressionSettings;
+	MLP settings;
+	Regression regressionSettings;
 	double correlationCoefficient;
 	double meanAbsoluteError;
 	double rootMeanSquaredError;
@@ -11,7 +11,7 @@ public class Result {
 	double rootRelativeSquaredError;
 	double instances;
 
-	public Result(AdvancedSettings settings, double correlationCoefficient, double meanAbsoluteError,
+	public Result(MLP settings, double correlationCoefficient, double meanAbsoluteError,
 			double rootMeanSquredError, double relativeAbsoluteError, double rootRelativeSquredError, double instances) {
 		super();
 		this.settings = settings;
@@ -27,7 +27,7 @@ public class Result {
 	
 	
 
-	public Result(RegressionSetting regressionSettings, double correlationCoefficient, double meanAbsoluteError,
+	public Result(Regression regressionSettings, double correlationCoefficient, double meanAbsoluteError,
 			double rootMeanSquaredError, double relativeAbsoluteError, double rootRelativeSquaredError,
 			double instances) {
 		super();
@@ -44,7 +44,7 @@ public class Result {
 
 
 
-	public RegressionSetting getRegressionSettings() {
+	public Regression getRegressionSettings() {
 		return regressionSettings;
 	}
 
@@ -52,7 +52,7 @@ public class Result {
 
 
 
-	public void setRegressionSettings(RegressionSetting regressionSettings) {
+	public void setRegressionSettings(Regression regressionSettings) {
 		this.regressionSettings = regressionSettings;
 	}
 
@@ -60,11 +60,11 @@ public class Result {
 
 
 
-	public AdvancedSettings getSettings() {
+	public MLP getSettings() {
 		return settings;
 	}
 
-	public void setSettings(AdvancedSettings settings) {
+	public void setSettings(MLP settings) {
 		this.settings = settings;
 	}
 

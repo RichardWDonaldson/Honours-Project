@@ -15,9 +15,9 @@ import java.util.TreeMap;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import model.AdvancedSettings;
+import model.MLP;
 import model.Model;
-import model.RegressionSetting;
+import model.Regression;
 import model.Result;
 import view.ChartView;
 import weka.classifiers.Classifier;
@@ -46,10 +46,10 @@ public class TestEvaluation {
 			Map<String, Long> mapTime = new TreeMap<String, Long>();
 			Map<String, Result> mapMeanResults = new TreeMap<String, Result>();
 			Map<String, List<List<NumericPrediction>>> mapPredictions = new TreeMap<String, List<List<NumericPrediction>>>();
-			Map<String, AdvancedSettings> map = model.populateMLPEvaluation();
+			Map<String, MLP> map = model.populateMLPEvaluation();
 			Map<String, DefaultCategoryDataset> mapDatasets = new TreeMap<String, DefaultCategoryDataset>();
 
-			for (Map.Entry<String, AdvancedSettings> entry : map.entrySet()) {
+			for (Map.Entry<String, MLP> entry : map.entrySet()) {
 				long startTime = System.nanoTime();
 				int testNumber = 1;
 				String outputType = entry.getKey();
@@ -160,10 +160,10 @@ public class TestEvaluation {
 			Map<String, Long> mapTime = new TreeMap<String, Long>();
 			Map<String, Result> mapMeanResults = new TreeMap<String, Result>();
 			Map<String, List<List<NumericPrediction>>> mapPredictions = new TreeMap<String, List<List<NumericPrediction>>>();
-			Map<String, RegressionSetting> map = model.populateRegressionEvaluation();
+			Map<String, Regression> map = model.populateRegressionEvaluation();
 			Map<String, DefaultCategoryDataset> mapDatasets = new TreeMap<String, DefaultCategoryDataset>();
 
-			for (Map.Entry<String, RegressionSetting> entry : map.entrySet()) {
+			for (Map.Entry<String, Regression> entry : map.entrySet()) {
 				long startTime = System.nanoTime();
 				int testNumber = 1;
 				String outputType = entry.getKey();
@@ -266,7 +266,7 @@ public class TestEvaluation {
 		}
 	}
 
-	public Result evaluateMLPModel(Instances testInstances, Classifier classifier, AdvancedSettings settings,
+	public Result evaluateMLPModel(Instances testInstances, Classifier classifier, MLP settings,
 			String outputType) {
 //		System.out.println("Evaluating Model on Test Set");
 //		try {
@@ -290,7 +290,7 @@ public class TestEvaluation {
 		return null;
 	}
 
-	public Result evaluateRegressionModel(Instances testInstances, Classifier classifier, RegressionSetting settings,
+	public Result evaluateRegressionModel(Instances testInstances, Classifier classifier, Regression settings,
 			String outputType) {
 //		System.out.println("Evaluating Model on Test Set");
 //
@@ -326,11 +326,11 @@ public class TestEvaluation {
 			Map<String, Long> mapTime = new TreeMap<String, Long>();
 			Map<String, Result> mapMeanResults = new TreeMap<String, Result>();
 			Map<String, List<List<NumericPrediction>>> mapPredictions = new TreeMap<String, List<List<NumericPrediction>>>();
-			Map<String, AdvancedSettings> map = model.populateMLPEvaluation();
+			Map<String, MLP> map = model.populateMLPEvaluation();
 			Map<String, DefaultCategoryDataset> mapDatasets = new TreeMap<String, DefaultCategoryDataset>();
 
 			for (int i = 1; i < fieldsToForecast.length; i++) {
-				for (Map.Entry<String, AdvancedSettings> entry : map.entrySet()) {
+				for (Map.Entry<String, MLP> entry : map.entrySet()) {
 					long startTime = System.nanoTime();
 					int testNumber = 1;
 					String outputType = entry.getKey();
@@ -444,10 +444,10 @@ public class TestEvaluation {
 			Map<String, Long> mapTime = new TreeMap<String, Long>();
 			Map<String, Result> mapMeanResults = new TreeMap<String, Result>();
 			Map<String, List<List<NumericPrediction>>> mapPredictions = new TreeMap<String, List<List<NumericPrediction>>>();
-			Map<String, RegressionSetting> map = model.populateRegressionEvaluation();
+			Map<String, Regression> map = model.populateRegressionEvaluation();
 			Map<String, DefaultCategoryDataset> mapDatasets = new TreeMap<String, DefaultCategoryDataset>();
 			for (int i = 1; i < fieldsToForecast.length; i++) {
-				for (Map.Entry<String, RegressionSetting> entry : map.entrySet()) {
+				for (Map.Entry<String, Regression> entry : map.entrySet()) {
 					long startTime = System.nanoTime();
 					int testNumber = 1;
 					String outputType = entry.getKey();
@@ -769,12 +769,12 @@ public class TestEvaluation {
 
 		}
 		if (algorithmType == "MLP") {
-			AdvancedSettings settings = null;
+			MLP settings = null;
 			Result sumResult = new Result(settings, correlationCoefficient, meanAbsoluteError, rootMeanSquaredError,
 					relativeAbsoluteError, rootRelativeSquaredError, instances);
 			return sumResult;
 		} else if (algorithmType == "REGRESSION") {
-			RegressionSetting settings = null;
+			Regression settings = null;
 			Result sumResult = new Result(settings, correlationCoefficient, meanAbsoluteError, rootMeanSquaredError,
 					relativeAbsoluteError, rootRelativeSquaredError, instances);
 			return sumResult;

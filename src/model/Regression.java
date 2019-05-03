@@ -1,6 +1,6 @@
 package model;
 
-public class RegressionSetting extends Settings {
+public class Regression extends Settings {
 
 		
 	double ridge;
@@ -8,7 +8,7 @@ public class RegressionSetting extends Settings {
 	int attributeSelectionMethod;
 	
 	
-	public RegressionSetting(String algorithmType, double ridge, int decimalPlaces, int attributeSelectionMethod) {
+	public Regression(String algorithmType, double ridge, int decimalPlaces, int attributeSelectionMethod) {
 		super(algorithmType);
 		this.ridge = ridge;
 		this.decimalPlaces = decimalPlaces;

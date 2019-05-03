@@ -14,9 +14,9 @@ public class Model {
 
 	public ArrayList<Evaluation> evaluations = new ArrayList<Evaluation>();
 
-	public ArrayList<AdvancedSettings> testSettings = new ArrayList<AdvancedSettings>();
+	public ArrayList<MLP> testSettings = new ArrayList<MLP>();
 
-	public void outputMLPResults(ChartSettings chartSettings, AdvancedSettings settings, ArrayList<Result> results) {
+	public void outputMLPResults(ChartSettings chartSettings, MLP settings, ArrayList<Result> results) {
 
 		ChartView window = new ChartView(chartSettings.getTitle(), chartSettings.getSubTitle(),
 				chartSettings.getxAxisTitle(), chartSettings.getyAxisTitle(), results);
@@ -24,7 +24,7 @@ public class Model {
 
 	}
 
-	public void outputRegressionResults(ChartSettings chartSettings, RegressionSetting settings,
+	public void outputRegressionResults(ChartSettings chartSettings, Regression settings,
 			ArrayList<Result> results) {
 		ChartView window = new ChartView(chartSettings.getTitle(), chartSettings.getSubTitle(),
 				chartSettings.getxAxisTitle(), chartSettings.getyAxisTitle(), results);
@@ -32,8 +32,8 @@ public class Model {
 
 	}
 
-	public Map<String, AdvancedSettings> populateMLPEvaluation() {
-		Map<String, AdvancedSettings> map = new TreeMap<String, AdvancedSettings>();
+	public Map<String, MLP> populateMLPEvaluation() {
+		Map<String, MLP> map = new TreeMap<String, MLP>();
 		double defaultLearningRate = 0.3;
 		double defaultMomentum = 0.2;
 		double defaultTrainingIterations = 500;
@@ -56,26 +56,26 @@ public class Model {
 		double[] validationThreshold = { 0, 10, 20, 40, 60, 80, 100 };
 
 		for (int j = 0; j < structure.length; j++) {
-			AdvancedSettings defaultSettings = new AdvancedSettings(defaultStructure, defaultTrainingIterations,
+			MLP defaultSettings = new MLP(defaultStructure, defaultTrainingIterations,
 					defaultLearningRate, defaultMomentum, defaultSeed, defaultValidationThreshold,
 					defaultValidationSetSize);
 
-			AdvancedSettings structureTest = new AdvancedSettings(structure[j], defaultTrainingIterations,
+			MLP structureTest = new MLP(structure[j], defaultTrainingIterations,
 					defaultLearningRate, defaultMomentum, defaultSeed, defaultValidationThreshold,
 					defaultValidationSetSize);
-			AdvancedSettings trainingIterationsTest = new AdvancedSettings(defaultStructure, trainingIterations[j],
+			MLP trainingIterationsTest = new MLP(defaultStructure, trainingIterations[j],
 					defaultLearningRate, defaultMomentum, defaultSeed, defaultValidationThreshold,
 					defaultValidationSetSize);
-			AdvancedSettings learningRateTest = new AdvancedSettings(defaultStructure, defaultTrainingIterations,
+			MLP learningRateTest = new MLP(defaultStructure, defaultTrainingIterations,
 					learningRate[j], defaultMomentum, defaultSeed, defaultValidationThreshold,
 					defaultValidationSetSize);
-			AdvancedSettings momentumTest = new AdvancedSettings(defaultStructure, defaultTrainingIterations,
+			MLP momentumTest = new MLP(defaultStructure, defaultTrainingIterations,
 					defaultLearningRate, momentum[j], defaultSeed, defaultValidationThreshold,
 					defaultValidationSetSize);
-			AdvancedSettings validationThresholdTest = new AdvancedSettings(defaultStructure, defaultTrainingIterations,
+			MLP validationThresholdTest = new MLP(defaultStructure, defaultTrainingIterations,
 					defaultLearningRate, defaultMomentum, defaultSeed, validationThreshold[j],
 					defaultValidationSetSize);
-			AdvancedSettings validationSizeTest = new AdvancedSettings(defaultStructure, defaultTrainingIterations,
+			MLP validationSizeTest = new MLP(defaultStructure, defaultTrainingIterations,
 					defaultLearningRate, defaultMomentum, defaultSeed, defaultValidationThreshold,
 					validationSetSize[j]);
 			map.put("DEFAULT", defaultSettings);
@@ -95,17 +95,17 @@ public class Model {
 	 * No Attribute: 0 M5: 1 Greedy: 2 Default Ridge: 1.0E-8 Default Decimal Places:
 	 * 4 Default Attribute: 1
 	 */
-	public Map<String, RegressionSetting> populateRegressionEvaluation() {
+	public Map<String, Regression> populateRegressionEvaluation() {
 
-		Map<String, RegressionSetting> map = new TreeMap<String, RegressionSetting>();
+		Map<String, Regression> map = new TreeMap<String, Regression>();
 
 		double[] ridge = { 1.0E-9, 0.5E-8, 1.0E-8, 2.0E-8, 3.0E-8, 1.0E-7 };
-		RegressionSetting defaultSetting = new RegressionSetting(ridge[0], 4, 1);
+		Regression defaultSetting = new Regression(ridge[0], 4, 1);
 		for (int i = 0; i < ridge.length; i++) {
 
-			RegressionSetting ridgeTestGreedy = new RegressionSetting(ridge[i], 4, 2);
-			RegressionSetting ridgeTestM5 = new RegressionSetting(ridge[i], 4, 1);
-			RegressionSetting ridgeTestNoAttribute = new RegressionSetting(ridge[i], 4, 0);
+			Regression ridgeTestGreedy = new Regression(ridge[i], 4, 2);
+			Regression ridgeTestM5 = new Regression(ridge[i], 4, 1);
+			Regression ridgeTestNoAttribute = new Regression(ridge[i], 4, 0);
 
 			map.put("RIDGE_TEST_GREEDY" + i, ridgeTestGreedy);
 			map.put("RIDGE_TEST_M" + i, ridgeTestM5);
